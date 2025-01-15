@@ -14,8 +14,8 @@ const mainCoefficients = {
     dur_2hrs: 0.185,
     dur_4hrs: 0.213,
     dist_local: 0.059,
-    dist_signif: -0.036, // Updated to match new coefficient
-    cost_cont: -0.036 // From Table 3
+    dist_signif: -0.036,
+    cost_cont: -0.034 // Updated based on Table 5 significance
 };
 
 // Model Coefficients by Loneliness Categories (Table 5)
@@ -230,8 +230,7 @@ const costData = {
         marketing: 1100,
         training: 350,
         miscellaneous: 550
-    },
-    // Add more attributes as needed
+    }
 };
 
 // Benefit Parameters
@@ -250,7 +249,7 @@ const costOfLivingMultipliers = {
 };
 
 // Initialize Charts for Each Loneliness Category
-let charts = {
+let probabilityCharts = {
     not_lonely: initializeProbabilityChart('probabilityChart_not_lonely', 'Predicted Probability of Programme Uptake - Not Lonely'),
     moderately_lonely: initializeProbabilityChart('probabilityChart_moderately_lonely', 'Predicted Probability of Programme Uptake - Moderately Lonely'),
     severely_lonely: initializeProbabilityChart('probabilityChart_severely_lonely', 'Predicted Probability of Programme Uptake - Severely Lonely')
@@ -273,7 +272,7 @@ function initializeProbabilityChart(canvasId, title) {
         data: {
             labels: ['Uptake Probability', 'Remaining'],
             datasets: [{
-                data: [0, 1],
+                data: [0, 100],
                 backgroundColor: ['rgba(39, 174, 96, 0.6)', 'rgba(236, 240, 241, 0.3)'], // Green and Light Gray
                 borderColor: ['rgba(39, 174, 96, 1)', 'rgba(236, 240, 241, 1)'],
                 borderWidth: 1
@@ -818,21 +817,14 @@ function capitalizeWords(str) {
     return str.replace(/\b\w/g, char => char.toUpperCase());
 }
 
-// Function to update CBA Chart
-function updateCBAChart(totalCost, benefits, category) {
-    const cbaChart = cbaCharts[category];
-    cbaChart.data.datasets[0].data = [totalCost, benefits];
-    cbaChart.update();
-}
-
 // Function to display WTP results
 function displayWTP(results) {
     const wtpDetailsDiv = document.getElementById('wtpDetails');
     wtpDetailsDiv.innerHTML = `
         <ul>
-            <li>Not Lonely: \$${results.not_lonely.WTP} AUD${categoryCoefficients.not_lonely.significance.cost_cont ? '*' : ''}</li>
-            <li>Moderately Lonely: \$${results.moderately_lonely.WTP} AUD${categoryCoefficients.moderately_lonely.significance.cost_cont ? '*' : ''}</li>
-            <li>Severely Lonely: \$${results.severely_lonely.WTP} AUD${categoryCoefficients.severely_lonely.significance.cost_cont ? '*' : ''}</li>
+            <li>Not Lonely: \$${results.not_lonely.WTP} AUD${isSignificant('not_lonely') ? '*' : ''}</li>
+            <li>Moderately Lonely: \$${results.moderately_lonely.WTP} AUD${isSignificant('moderately_lonely') ? '*' : ''}</li>
+            <li>Severely Lonely: \$${results.severely_lonely.WTP} AUD${isSignificant('severely_lonely') ? '*' : ''}</li>
         </ul>
         <p>* Indicates significant estimates (p < 0.05)</p>
     `;
@@ -862,19 +854,22 @@ function downloadWTPReport() {
     doc.setFontSize(16);
     doc.text("LonelyLessAustralia - Willingness To Pay (WTP) Report", 10, 20);
     doc.setFontSize(12);
-    doc.text(`Not Lonely: \$${document.getElementById('wtpDetails').children[0].children[0].innerText.split('$')[1].split(' ')[0]} AUD*`, 10, 30);
-    doc.text(`Moderately Lonely: \$${document.getElementById('wtpDetails').children[0].children[1].innerText.split('$')[1].split(' ')[0]} AUD*`, 10, 40);
-    doc.text(`Severely Lonely: \$${document.getElementById('wtpDetails').children[0].children[2].innerText.split('$')[1].split(' ')[0]} AUD*`, 10, 50);
-    doc.text(`* Indicates significant estimates (p < 0.05)`, 10, 60);
-    
+    const wtpList = document.getElementById('wtpDetails').getElementsByTagName('li');
+    let yPosition = 30;
+    for (let li of wtpList) {
+        doc.text(li.innerText, 10, yPosition);
+        yPosition += 10;
+    }
+    doc.text(`* Indicates significant estimates (p < 0.05)`, 10, yPosition);
+
     // Add a line break
-    doc.line(10, 65, 200, 65);
+    doc.line(10, yPosition + 5, 200, yPosition + 5);
 
     // Add WTP Chart as image
     const wtpChartCanvas = document.getElementById('wtpChart');
     const wtpChartURL = wtpChartCanvas.toDataURL('image/png', 1.0);
-    doc.text("WTP Chart:", 10, 75);
-    doc.addImage(wtpChartURL, 'PNG', 10, 80, 60, 60);
+    doc.text("WTP Chart:", 10, yPosition + 15);
+    doc.addImage(wtpChartURL, 'PNG', 10, yPosition + 20, 60, 60);
 
     // Save PDF
     doc.save('WTP_Report.pdf');
@@ -894,4 +889,10 @@ document.getElementById('feedbackForm').addEventListener('submit', function(even
     } else {
         alert("Please enter your feedback before submitting.");
     }
-});
+}
+);
+
+// Ensure all charts are initialized on page load
+window.onload = function() {
+    // No additional initialization needed as charts are already initialized
+};
