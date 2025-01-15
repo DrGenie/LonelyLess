@@ -40,6 +40,18 @@
             <p>These support programmes are essential in fostering community engagement and improving the well-being of our older adult population.</p>
         </section>
         
+        <!-- Loneliness Categories Description -->
+        <section class="loneliness-categories" aria-labelledby="loneliness-categories-heading">
+            <h2 id="loneliness-categories-heading">How Loneliness is Categorised</h2>
+            <p>In this tool, loneliness among older adults is categorized into three distinct groups based on the severity of their feelings of loneliness:</p>
+            <ul>
+                <li><strong>Not Lonely:</strong> Individuals who do not experience significant feelings of loneliness.</li>
+                <li><strong>Moderately Lonely:</strong> Individuals who experience occasional feelings of loneliness.</li>
+                <li><strong>Severely Lonely:</strong> Individuals who frequently experience intense feelings of loneliness.</li>
+            </ul>
+            <p>Understanding the category you belong to helps in tailoring support programmes that best suit your needs.</p>
+        </section>
+        
         <!-- Decision Form -->
         <form id="decisionForm" aria-labelledby="decision-form-heading">
             <h2 id="decision-form-heading" class="sr-only">Decision Form</h2>
@@ -235,137 +247,6 @@
             <!-- Submit Button -->
             <button type="button" onclick="calculateProbability()" aria-label="Calculate the probability of programme uptake">Calculate Probability</button>
         </form>
-    
-        <!-- Display Result Section -->
-        <section id="result" aria-labelledby="result-heading">
-            <h2 id="result-heading">Predicted Probability of Programme Uptake</h2>
-            
-            <!-- Not Lonely Group -->
-            <div class="result-group" id="notLonelyGroup">
-                <h3>Not Lonely</h3>
-                <p>Predicted Probability of Uptake: <span id="probability_not_lonely">--</span></p>
-                <div class="chart-container">
-                    <canvas id="probabilityChart_not_lonely" aria-label="Doughnut chart showing uptake probability for Not Lonely group" role="img"></canvas>
-                    <div id="probabilityChartSummary_not_lonely" class="sr-only">
-                        <p>The Uptake Probability chart displays the likelihood of programme uptake compared to the remaining probability for the Not Lonely group.</p>
-                    </div>
-                </div>
-                <div id="interpretations_not_lonely" aria-live="polite"></div>
-                <section id="programPackage_not_lonely">
-                    <h4>Your Selected Programme Package:</h4>
-                    <ul id="packageList_not_lonely"></ul>
-                    <button onclick="downloadPackage('not_lonely')" aria-label="Download your selected programme package for Not Lonely group">Download Programme Package</button>
-                    <button onclick="downloadChart('not_lonely')" aria-label="Download the Uptake Probability chart for Not Lonely group">Download Uptake Probability Chart</button>
-                </section>
-                <div id="costInformation_not_lonely" aria-labelledby="cost-information-heading_not_lonely">
-                    <h4>Cost Analysis:</h4>
-                    <ul id="costList_not_lonely"></ul>
-                    <p><strong>Total Estimated Cost:</strong> <span id="totalCost_not_lonely">--</span> AUD</p>
-                    
-                    <h4>Benefit Analysis:</h4>
-                    <p><strong>Total Estimated Benefits:</strong> <span id="totalBenefits_not_lonely">--</span> AUD</p>
-                    
-                    <h4>Cost-Benefit Analysis:</h4>
-                    <p><strong>Net Benefit:</strong> <span id="netBenefit_not_lonely">--</span> AUD</p>
-                    <p><strong>Benefit-Cost Ratio:</strong> <span id="bcr_not_lonely">--</span></p>
-                    
-                    <!-- CBA Chart -->
-                    <div class="chart-container">
-                        <canvas id="cbaChart_not_lonely" aria-label="Bar chart showing Cost-Benefit Analysis for Not Lonely group" role="img"></canvas>
-                        <div id="chartSummary_not_lonely" class="sr-only">
-                            <p>The Cost-Benefit Analysis chart compares the total estimated costs against the total estimated benefits of the selected programme package for the Not Lonely group.</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Download CBA Report -->
-                    <button onclick="downloadCBAPDF('not_lonely')" aria-label="Download the Cost-Benefit Analysis report as PDF for Not Lonely group">Download CBA Report as PDF</button>
-                </div>
-            </div>
-            
-            <!-- Moderately Lonely Group -->
-            <div class="result-group" id="moderatelyLonelyGroup">
-                <h3>Moderately Lonely</h3>
-                <p>Predicted Probability of Uptake: <span id="probability_moderately_lonely">--</span></p>
-                <div class="chart-container">
-                    <canvas id="probabilityChart_moderately_lonely" aria-label="Doughnut chart showing uptake probability for Moderately Lonely group" role="img"></canvas>
-                    <div id="probabilityChartSummary_moderately_lonely" class="sr-only">
-                        <p>The Uptake Probability chart displays the likelihood of programme uptake compared to the remaining probability for the Moderately Lonely group.</p>
-                    </div>
-                </div>
-                <div id="interpretations_moderately_lonely" aria-live="polite"></div>
-                <section id="programPackage_moderately_lonely">
-                    <h4>Your Selected Programme Package:</h4>
-                    <ul id="packageList_moderately_lonely"></ul>
-                    <button onclick="downloadPackage('moderately_lonely')" aria-label="Download your selected programme package for Moderately Lonely group">Download Programme Package</button>
-                    <button onclick="downloadChart('moderately_lonely')" aria-label="Download the Uptake Probability chart for Moderately Lonely group">Download Uptake Probability Chart</button>
-                </section>
-                <div id="costInformation_moderately_lonely" aria-labelledby="cost-information-heading_moderately_lonely">
-                    <h4>Cost Analysis:</h4>
-                    <ul id="costList_moderately_lonely"></ul>
-                    <p><strong>Total Estimated Cost:</strong> <span id="totalCost_moderately_lonely">--</span> AUD</p>
-                    
-                    <h4>Benefit Analysis:</h4>
-                    <p><strong>Total Estimated Benefits:</strong> <span id="totalBenefits_moderately_lonely">--</span> AUD</p>
-                    
-                    <h4>Cost-Benefit Analysis:</h4>
-                    <p><strong>Net Benefit:</strong> <span id="netBenefit_moderately_lonely">--</span> AUD</p>
-                    <p><strong>Benefit-Cost Ratio:</strong> <span id="bcr_moderately_lonely">--</span></p>
-                    
-                    <!-- CBA Chart -->
-                    <div class="chart-container">
-                        <canvas id="cbaChart_moderately_lonely" aria-label="Bar chart showing Cost-Benefit Analysis for Moderately Lonely group" role="img"></canvas>
-                        <div id="chartSummary_moderately_lonely" class="sr-only">
-                            <p>The Cost-Benefit Analysis chart compares the total estimated costs against the total estimated benefits of the selected programme package for the Moderately Lonely group.</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Download CBA Report -->
-                    <button onclick="downloadCBAPDF('moderately_lonely')" aria-label="Download the Cost-Benefit Analysis report as PDF for Moderately Lonely group">Download CBA Report as PDF</button>
-                </div>
-            </div>
-            
-            <!-- Severely Lonely Group -->
-            <div class="result-group" id="severelyLonelyGroup">
-                <h3>Severely Lonely</h3>
-                <p>Predicted Probability of Uptake: <span id="probability_severely_lonely">--</span></p>
-                <div class="chart-container">
-                    <canvas id="probabilityChart_severely_lonely" aria-label="Doughnut chart showing uptake probability for Severely Lonely group" role="img"></canvas>
-                    <div id="probabilityChartSummary_severely_lonely" class="sr-only">
-                        <p>The Uptake Probability chart displays the likelihood of programme uptake compared to the remaining probability for the Severely Lonely group.</p>
-                    </div>
-                </div>
-                <div id="interpretations_severely_lonely" aria-live="polite"></div>
-                <section id="programPackage_severely_lonely">
-                    <h4>Your Selected Programme Package:</h4>
-                    <ul id="packageList_severely_lonely"></ul>
-                    <button onclick="downloadPackage('severely_lonely')" aria-label="Download your selected programme package for Severely Lonely group">Download Programme Package</button>
-                    <button onclick="downloadChart('severely_lonely')" aria-label="Download the Uptake Probability chart for Severely Lonely group">Download Uptake Probability Chart</button>
-                </section>
-                <div id="costInformation_severely_lonely" aria-labelledby="cost-information-heading_severely_lonely">
-                    <h4>Cost Analysis:</h4>
-                    <ul id="costList_severely_lonely"></ul>
-                    <p><strong>Total Estimated Cost:</strong> <span id="totalCost_severely_lonely">--</span> AUD</p>
-                    
-                    <h4>Benefit Analysis:</h4>
-                    <p><strong>Total Estimated Benefits:</strong> <span id="totalBenefits_severely_lonely">--</span> AUD</p>
-                    
-                    <h4>Cost-Benefit Analysis:</h4>
-                    <p><strong>Net Benefit:</strong> <span id="netBenefit_severely_lonely">--</span> AUD</p>
-                    <p><strong>Benefit-Cost Ratio:</strong> <span id="bcr_severely_lonely">--</span></p>
-                    
-                    <!-- CBA Chart -->
-                    <div class="chart-container">
-                        <canvas id="cbaChart_severely_lonely" aria-label="Bar chart showing Cost-Benefit Analysis for Severely Lonely group" role="img"></canvas>
-                        <div id="chartSummary_severely_lonely" class="sr-only">
-                            <p>The Cost-Benefit Analysis chart compares the total estimated costs against the total estimated benefits of the selected programme package for the Severely Lonely group.</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Download CBA Report -->
-                    <button onclick="downloadCBAPDF('severely_lonely')" aria-label="Download the Cost-Benefit Analysis report as PDF for Severely Lonely group">Download CBA Report as PDF</button>
-                </div>
-            </div>
-        </section>
     
         <!-- WTP Results Section -->
         <section id="wtpResults" aria-labelledby="wtp-results-heading">
