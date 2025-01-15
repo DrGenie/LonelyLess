@@ -23,7 +23,7 @@ header h1 {
     margin-bottom: 20px;
 }
 
-h1, h2, h3 {
+h1, h2, h3, h4 {
     text-align: center;
     color: #2c3e50;
     margin-bottom: 20px;
@@ -132,19 +132,34 @@ button:hover {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 }
 
+.result-group {
+    margin-bottom: 50px;
+}
+
+.result-group h3 {
+    color: #2980b9;
+    margin-bottom: 15px;
+}
+
+.result-group p {
+    font-size: 1.2em;
+    color: #27ae60;
+    font-weight: 700;
+}
+
 #probability {
     color: #27ae60;
     font-weight: 700;
     font-size: 2em;
 }
 
-#interpretations {
+#interpretations, #interpretations_not_lonely, #interpretations_moderately_lonely, #interpretations_severely_lonely {
     margin-top: 20px;
     font-size: 1.1em;
     color: #2c3e50;
 }
 
-#programPackage h3, #costInformation h3 {
+#programPackage h4, #costInformation h4 {
     color: #2980b9;
     margin-bottom: 15px;
 }
@@ -160,7 +175,7 @@ button:hover {
     margin-bottom: 8px;
 }
 
-#downloadPackageBtn, #downloadChartBtn, #downloadCBAPDFBtn {
+#downloadPackageBtn, #downloadChartBtn, #downloadCBAPDFBtn, #downloadCBAPDFBtn_moderately_lonely, #downloadCBAPDFBtn_severely_lonely, #downloadWTPReportBtn {
     margin-top: 15px;
     padding: 10px 18px;
     background-color: #2980b9;
@@ -173,14 +188,14 @@ button:hover {
     margin-right: 10px;
 }
 
-#downloadPackageBtn:hover, #downloadChartBtn:hover, #downloadCBAPDFBtn:hover {
+#downloadPackageBtn:hover, #downloadChartBtn:hover, #downloadCBAPDFBtn:hover, #downloadCBAPDFBtn_moderately_lonely:hover, #downloadCBAPDFBtn_severely_lonely:hover, #downloadWTPReportBtn:hover {
     background-color: #1f6391;
     transform: translateY(-2px);
 }
 
 /* Chart Container Styling */
 .chart-container {
-    margin-top: 60px;
+    margin-top: 20px;
     width: 100%;
     height: 450px;
     background-color: #ffffff;
@@ -190,13 +205,9 @@ button:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-#cbaChart {
-    width: 100%;
-    height: 300px;
-    margin-top: 20px;
-}
-
-#probabilityChart {
+#cbaChart_not_lonely, #cbaChart_moderately_lonely, #cbaChart_severely_lonely,
+#probabilityChart_not_lonely, #probabilityChart_moderately_lonely, #probabilityChart_severely_lonely,
+#wtpChart {
     width: 100%;
     height: 300px;
     margin-top: 20px;
@@ -241,7 +252,7 @@ button:hover {
 }
 
 /* Cost Information Styling */
-#costInformation {
+#costInformation, #costInformation_moderately_lonely, #costInformation_severely_lonely {
     margin-top: 30px;
     padding: 20px;
     background-color: #fdf5e6;
@@ -249,71 +260,59 @@ button:hover {
     border-radius: 6px;
 }
 
-#costInformation h3 {
+#costInformation h4, #costInformation_moderately_lonely h4, #costInformation_severely_lonely h4 {
     color: #e67e22;
     margin-bottom: 15px;
 }
 
-#costList {
+#costList_not_lonely, #costList_moderately_lonely, #costList_severely_lonely {
     list-style-type: disc;
     margin-left: 25px;
     font-size: 1em;
     color: #34495e;
 }
 
-#costList li {
+#costList_not_lonely li, #costList_moderately_lonely li, #costList_severely_lonely li {
     margin-bottom: 8px;
 }
 
-#totalCost {
+#totalCost, #totalCost_moderately_lonely, #totalCost_severely_lonely {
     color: #c0392b;
     font-weight: 700;
     font-size: 1.2em;
 }
 
-#benefits p, #cba p {
-    font-size: 1em;
-    color: #34495e;
-}
-
-#netBenefit {
-    color: #c0392b;
-    font-weight: 700;
-    font-size: 1.2em;
-}
-
-#bcr {
+#totalBenefits, #totalBenefits_moderately_lonely, #totalBenefits_severely_lonely {
     color: #27ae60;
     font-weight: 700;
     font-size: 1.2em;
 }
 
-/* CBA Chart Container Styling */
-#cbaChart {
-    width: 100%;
-    height: 300px;
+#netBenefit, #netBenefit_moderately_lonely, #netBenefit_severely_lonely {
+    color: #c0392b;
+    font-weight: 700;
+    font-size: 1.2em;
+}
+
+#bcr, #bcr_moderately_lonely, #bcr_severely_lonely {
+    color: #27ae60;
+    font-weight: 700;
+    font-size: 1.2em;
+}
+
+#wtpDetails {
     margin-top: 20px;
+    font-size: 1.1em;
+    color: #2c3e50;
 }
 
-/* Responsive Table Styling */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
+#wtpDetails ul {
+    list-style-type: disc;
+    margin-left: 25px;
 }
 
-table, th, td {
-    border: 1px solid #bdc3c7;
-}
-
-th, td {
-    padding: 10px;
-    text-align: left;
-}
-
-th {
-    background-color: #2980b9;
-    color: #ffffff;
+#wtpDetails li {
+    margin-bottom: 8px;
 }
 
 /* Accessible Visually Hidden Text */
@@ -369,26 +368,17 @@ footer {
     width: 100%; /* Ensure full width within the container */
 }
 
-/* Analysis Buttons Styling */
-.analysis-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 30px;
-}
-
-.analysis-buttons button {
-    padding: 12px 20px;
-    background-color: #8e44ad;
-    color: #ffffff;
-    border: none;
-    font-size: 1em;
-    cursor: pointer;
-    border-radius: 6px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.analysis-buttons button:hover {
-    background-color: #732d91;
-    transform: translateY(-2px);
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px 30px;
+    }
+    
+    button {
+        width: 100%;
+    }
+    
+    .support-program {
+        width: 100%;
+    }
 }
