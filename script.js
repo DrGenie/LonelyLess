@@ -298,6 +298,15 @@ function initializeProbabilityChart(canvasId, title) {
                         size: 18
                     },
                     color: '#2c3e50'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            let value = context.parsed;
+                            return `${label}: ${value}%`;
+                        }
+                    }
                 }
             }
         }
@@ -330,7 +339,17 @@ function initializeCBAChart(canvasId, title) {
             maintainAspectRatio: false,
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'AUD'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Categories'
+                    }
                 }
             },
             plugins: {
@@ -344,6 +363,15 @@ function initializeCBAChart(canvasId, title) {
                         size: 18
                     },
                     color: '#2c3e50'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            let value = context.parsed.y;
+                            return `${label}: $${value.toLocaleString()} AUD`;
+                        }
+                    }
                 }
             }
         }
@@ -402,6 +430,15 @@ function initializeWTPChart(canvasId, title) {
                         size: 18
                     },
                     color: '#2c3e50'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            let value = context.parsed.y;
+                            return `${label}: $${value.toLocaleString()} AUD`;
+                        }
+                    }
                 }
             }
         }
@@ -616,8 +653,8 @@ function displayResults(category, data) {
     packageList.innerHTML = generateProgramPackage(data.selectedAttributes);
 
     // Show or hide download buttons based on package selection
-    const downloadPackageBtn = programPackageSection.querySelector('button[aria-label^="Download Programme Package"]');
-    const downloadChartBtn = programPackageSection.querySelector('button[aria-label^="Download the Uptake Probability chart"]');
+    const downloadPackageBtn = programPackageSection.querySelector('button[onclick^="downloadPackage"]');
+    const downloadChartBtn = programPackageSection.querySelector('button[onclick^="downloadChart"]');
     if (packageList.children.length > 0) {
         downloadPackageBtn.style.display = 'inline-block';
         downloadChartBtn.style.display = 'inline-block';
@@ -889,10 +926,9 @@ document.getElementById('feedbackForm').addEventListener('submit', function(even
     } else {
         alert("Please enter your feedback before submitting.");
     }
-}
-);
+});
 
-// Ensure all charts are initialized on page load
+// Function to ensure all charts are initialized on page load
 window.onload = function() {
     // No additional initialization needed as charts are already initialized
 };
