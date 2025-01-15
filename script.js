@@ -404,20 +404,49 @@ function calculateProbability() {
         // Calculate WTP
         const WTP = P_final * benefitPerPercent;
 
+        // Calculate WTP per attribute
+        const WTP_per_attribute = {};
+        const attributes = ['type_comm', 'type_psych', 'type_vr', 'mode_virtual', 'mode_hybrid', 'freq_weekly', 'freq_monthly', 'dur_2hrs', 'dur_4hrs', 'dist_local', 'dist_signif'];
+        attributes.forEach(attr => {
+            if (coef.hasOwnProperty(attr)) {
+                const wtp = -(coef[attr] / coef.cost_cont).toFixed(2);
+                WTP_per_attribute[attr] = parseFloat(wtp);
+            }
+        });
+
+        // Calculate totalCost
+        const totalCost = calculateTotalCost(selectedAttributes, state, adjustCosts);
+
+        // Calculate benefits
+        const benefits = calculateBenefits(P_final);
+
+        // Calculate netBenefit
+        const netBenefit = benefits - totalCost;
+
+        // Calculate benefit-cost ratio
+        const bcr = (benefits / totalCost).toFixed(2);
+
         // Store results
         results[category] = {
             probability: (P_final * 100).toFixed(2) + '%',
             P_final: P_final,
             WTP: WTP.toLocaleString(),
+            WTP_per_attribute: WTP_per_attribute,
             selectedAttributes: selectedAttributes,
             category: category,
-            significance: coef.significance
+            significance: coef.significance,
+            state: state,
+            adjustCosts: adjustCosts,
+            totalCost: totalCost.toLocaleString(),
+            benefits: benefits.toLocaleString(),
+            netBenefit: netBenefit.toLocaleString(),
+            bcr: bcr
         };
     });
 
     // Display results for each category in new windows
     categories.forEach(category => {
-        openResultWindow(category, results[category]);
+        openResultWindow(category, results[category], results[category].WTP_per_attribute);
     });
 
     // Calculate and display WTP results
@@ -453,37 +482,23 @@ function generateProgramPackage(attributes) {
 
 // Function to calculate total cost with state adjustment
 function calculateTotalCost(selectedAttributes, state, adjustCosts) {
-    let totalCost = {
-        personnel: 0,
-        materials: 0,
-        technology: 0,
-        facility: 0,
-        marketing: 0,
-        training: 0,
-        miscellaneous: 0
-    };
-    
+    let totalCost = 0;
+
     selectedAttributes.forEach(attr => {
         const costs = costData[attr];
         for (let key in costs) {
-            if (costs[key]) {
-                totalCost[key] += costs[key];
+            if (costs[key] > 0) {
+                totalCost += costs[key];
             }
         }
     });
 
-    // Calculate Grand Total before adjustment
-    let grandTotal = 0;
-    for (let key in totalCost) {
-        grandTotal += totalCost[key];
-    }
-
     // Apply Cost-of-Living Adjustment if applicable
     if (adjustCosts === 'yes' && state && costOfLivingMultipliers[state]) {
-        grandTotal = grandTotal * costOfLivingMultipliers[state];
+        totalCost = totalCost * costOfLivingMultipliers[state];
     }
 
-    return grandTotal;
+    return totalCost;
 }
 
 // Helper Function to Get Selected Attributes
@@ -503,11 +518,11 @@ function getSelectedAttributes() {
 }
 
 // Function to open result in new window
-function openResultWindow(category, data) {
+function openResultWindow(category, data, WTP_per_attribute) {
     // Create a new window
-    const resultWindow = window.open('', '_blank', 'width=800,height=800');
+    const resultWindow = window.open('', '_blank', 'width=900,height=900');
     
-    // Build HTML content
+    // Build HTML content with embedded data
     const htmlContent = `
         <!DOCTYPE html>
         <html lang="en">
@@ -556,6 +571,22 @@ function openResultWindow(category, data) {
                     height: 300px;
                     margin-top: 20px;
                 }
+                #wtpPerAttribute {
+                    margin-top: 20px;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 10px;
+                }
+                th, td {
+                    border: 1px solid #bdc3c7;
+                    padding: 8px;
+                    text-align: left;
+                }
+                th {
+                    background-color: #ecf0f1;
+                }
                 button {
                     padding: 10px 15px;
                     background-color: #2980b9;
@@ -581,7 +612,7 @@ function openResultWindow(category, data) {
                 <canvas id="probabilityChart" aria-label="Doughnut chart showing uptake probability for ${formatCategoryName(category)} group" role="img"></canvas>
             </div>
             <div id="interpretations" aria-live="polite">
-                ${generateInterpretations(data.P_final)}
+                ${generateInterpretationText(data.P_final)}
             </div>
             <section id="programPackage">
                 <h3>Your Selected Programme Package:</h3>
@@ -589,20 +620,39 @@ function openResultWindow(category, data) {
             </section>
             <div id="costInformation">
                 <h3>Cost Analysis:</h3>
-                <ul>${generateCostList(data.selectedAttributes, state, adjustCosts)}</ul>
-                <p><strong>Total Estimated Cost:</strong> \$${calculateTotalCost(data.selectedAttributes, state, adjustCosts).toLocaleString()} AUD</p>
+                <ul>
+                    ${generateCostListHTML(data.selectedAttributes, data.state, data.adjustCosts)}
+                </ul>
+                <p><strong>Total Estimated Cost:</strong> \$${data.totalCost} AUD</p>
             </div>
             <div id="benefitInformation">
                 <h3>Benefit Analysis:</h3>
-                <p><strong>Total Estimated Benefits:</strong> \$${calculateBenefits(data.P_final).toLocaleString()} AUD</p>
+                <p><strong>Total Estimated Benefits:</strong> \$${data.benefits} AUD</p>
             </div>
             <div id="cbaInformation">
                 <h3>Cost-Benefit Analysis:</h3>
-                <p><strong>Net Benefit:</strong> \$${(calculateBenefits(data.P_final) - calculateTotalCost(data.selectedAttributes, state, adjustCosts)).toLocaleString()} AUD</p>
-                <p><strong>Benefit-Cost Ratio:</strong> ${(calculateBenefits(data.P_final) / calculateTotalCost(data.selectedAttributes, state, adjustCosts)).toFixed(2)}</p>
+                <p><strong>Net Benefit:</strong> \$${data.netBenefit} AUD</p>
+                <p><strong>Benefit-Cost Ratio:</strong> ${data.bcr}</p>
             </div>
             <div class="chart-container">
                 <canvas id="cbaChart" aria-label="Bar chart showing Cost-Benefit Analysis for ${formatCategoryName(category)} group" role="img"></canvas>
+            </div>
+            <div id="wtpPerAttribute">
+                <h3>Willingness To Pay (WTP) per Attribute:</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Attribute</th>
+                            <th>WTP (AUD)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${generateWTPPerAttributeTable(WTP_per_attribute)}
+                    </tbody>
+                </table>
+            </div>
+            <div class="chart-container">
+                <canvas id="wtpPerAttributeChart" aria-label="Bar chart showing WTP per Attribute for ${formatCategoryName(category)} group" role="img"></canvas>
             </div>
             <button onclick="window.close()" aria-label="Close this window">Close</button>
             <script>
@@ -640,7 +690,7 @@ function openResultWindow(category, data) {
                                     label: function(context) {
                                         let label = context.label || '';
                                         let value = context.parsed;
-                                        return `${label}: ${value}%`;
+                                        return \`\${label}: \${value}%\`;
                                     }
                                 }
                             }
@@ -656,7 +706,7 @@ function openResultWindow(category, data) {
                         labels: ['Total Costs', 'Total Benefits'],
                         datasets: [{
                             label: 'Amount (AUD)',
-                            data: [${calculateTotalCost(data.selectedAttributes, state, adjustCosts)}, ${calculateBenefits(data.P_final)}],
+                            data: [${data.totalCost}, ${data.benefits}],
                             backgroundColor: [
                                 'rgba(231, 76, 60, 0.6)', // Red for Costs
                                 'rgba(39, 174, 96, 0.6)'   // Green for Benefits
@@ -698,7 +748,59 @@ function openResultWindow(category, data) {
                                     label: function(context) {
                                         let label = context.dataset.label || '';
                                         let value = context.parsed.y;
-                                        return `${label}: $${value.toLocaleString()} AUD`;
+                                        return \`\${label}: $\${value.toLocaleString()} AUD\`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Initialize WTP per Attribute Chart
+                const wtpPerAttrCtx = document.getElementById('wtpPerAttributeChart').getContext('2d');
+                new Chart(wtpPerAttrCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ${JSON.stringify(Object.keys(WTP_per_attribute))},
+                        datasets: [{
+                            label: 'WTP per Attribute (AUD)',
+                            data: ${JSON.stringify(Object.values(WTP_per_attribute))},
+                            backgroundColor: 'rgba(155, 89, 182, 0.6)', // Purple
+                            borderColor: 'rgba(155, 89, 182, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'AUD'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Attributes'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        let value = context.parsed.y;
+                                        return \`\${label}: $\${value.toLocaleString()} AUD\`;
                                     }
                                 }
                             }
@@ -709,92 +811,54 @@ function openResultWindow(category, data) {
         </body>
         </html>
     `;
-
+    
     // Write HTML content to the new window
     resultWindow.document.write(htmlContent);
     resultWindow.document.close();
 }
 
-// Function to generate brief interpretations based on probability and category
-function generateInterpretations(probability) {
-    let interpretation = '';
-
-    if (probability < 0.3) {
-        interpretation = `<p>Your selected support programmes have a low probability of uptake (<30%). This suggests that the current configuration may not be attractive to older adults. Consider revising the programme features to better meet the needs and preferences of your target population.</p>`;
-    } else if (probability >= 0.3 && probability < 0.7) {
-        interpretation = `<p>Your selected support programmes have a moderate probability of uptake (30%-70%). While there is potential interest, there is room for improvement. Enhancing certain programme features could increase engagement and participation rates.</p>`;
+// Function to generate brief interpretations based on probability
+function generateInterpretationText(P_final) {
+    if (P_final < 0.3) {
+        return `<p>Your selected support programmes have a low probability of uptake (<30%). This suggests that the current configuration may not be attractive to older adults. Consider revising the programme features to better meet the needs and preferences of your target population.</p>`;
+    } else if (P_final >= 0.3 && P_final < 0.7) {
+        return `<p>Your selected support programmes have a moderate probability of uptake (30%-70%). While there is potential interest, there is room for improvement. Enhancing certain programme features could increase engagement and participation rates.</p>`;
     } else {
-        interpretation = `<p>Your selected support programmes have a high probability of uptake (>70%). This indicates strong acceptance and interest from older adults. Maintaining and promoting these programme features is recommended to maximise impact.</p>`;
+        return `<p>Your selected support programmes have a high probability of uptake (>70%). This indicates strong acceptance and interest from older adults. Maintaining and promoting these programme features is recommended to maximise impact.</p>`;
     }
-
-    return interpretation;
 }
 
-// Function to generate Cost List for the result window
-function generateCostList(attributes, state, adjustCosts) {
-    let costList = '';
-    let totalCost = 0;
-
+// Function to generate Cost List HTML
+function generateCostListHTML(attributes, state, adjustCosts) {
+    let costListHTML = '';
     attributes.forEach(attr => {
         const costs = costData[attr];
         for (let key in costs) {
             if (costs[key] > 0) {
-                costList += `<li>${capitalizeFirstLetter(key)}: \$${costs[key].toLocaleString()}</li>`;
-                totalCost += costs[key];
+                costListHTML += `<li>${formatAttributeName(key)}: \$${costs[key].toLocaleString()}</li>`;
             }
         }
     });
-
-    // Apply Cost-of-Living Adjustment if applicable
-    if (adjustCosts === 'yes' && state && costOfLivingMultipliers[state]) {
-        totalCost = totalCost * costOfLivingMultipliers[state];
-    }
-
-    // Update total cost display
-    document.getElementById(`totalCost_${category}`).innerText = totalCost.toLocaleString();
-
-    return costList;
+    return costListHTML;
 }
 
-// Function to calculate total cost with state adjustment
-function calculateTotalCost(attributes, state, adjustCosts) {
-    let totalCost = 0;
-
-    attributes.forEach(attr => {
-        const costs = costData[attr];
-        for (let key in costs) {
-            if (costs[key] > 0) {
-                totalCost += costs[key];
-            }
-        }
-    });
-
-    // Apply Cost-of-Living Adjustment if applicable
-    if (adjustCosts === 'yes' && state && costOfLivingMultipliers[state]) {
-        totalCost = totalCost * costOfLivingMultipliers[state];
-    }
-
-    return totalCost;
-}
-
-// Function to calculate benefits based on probability
-function calculateBenefits(probability) {
-    const benefits = probability * 100 * benefitPerPercent;
-    return benefits;
-}
-
-// Function to format category names
-function formatCategoryName(category) {
-    switch(category) {
-        case 'not_lonely':
-            return 'Not Lonely';
-        case 'moderately_lonely':
-            return 'Moderately Lonely';
-        case 'severely_lonely':
-            return 'Severely Lonely';
-        default:
-            return capitalizeWords(category.replace('_', ' '));
-    }
+// Function to format attribute names
+function formatAttributeName(attr) {
+    // Convert attribute IDs to user-friendly names
+    const mapping = {
+        type_comm: 'Community Engagement',
+        type_psych: 'Psychological Counselling',
+        type_vr: 'Virtual Reality',
+        mode_virtual: 'Virtual Mode',
+        mode_hybrid: 'Hybrid Mode',
+        freq_weekly: 'Weekly Frequency',
+        freq_monthly: 'Monthly Frequency',
+        dur_2hrs: '2 Hours Duration',
+        dur_4hrs: '4 Hours Duration',
+        dist_local: 'Local Area Accessibility',
+        dist_signif: 'Low Accessibility'
+    };
+    return mapping[attr] || capitalizeWords(attr.replace('_', ' '));
 }
 
 // Function to capitalize each word
@@ -802,7 +866,16 @@ function capitalizeWords(str) {
     return str.replace(/\b\w/g, char => char.toUpperCase());
 }
 
-// Function to display WTP results
+// Function to generate WTP per Attribute Table Rows
+function generateWTPPerAttributeTable(WTP_per_attribute) {
+    let tableRows = '';
+    for (let attr in WTP_per_attribute) {
+        tableRows += `<tr><td>${formatAttributeName(attr)}</td><td>$${WTP_per_attribute[attr].toLocaleString()} AUD</td></tr>`;
+    }
+    return tableRows;
+}
+
+// Function to display WTP results in the main window
 function displayWTP(results) {
     const wtpDetailsDiv = document.getElementById('wtpDetails');
     wtpDetailsDiv.innerHTML = `
@@ -830,48 +903,3 @@ function updateWTPChart(results) {
     ];
     wtpChart.update();
 }
-
-// Function to download WTP report as PDF
-function downloadWTPReport() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-
-    doc.setFontSize(16);
-    doc.text("LonelyLessAustralia - Willingness To Pay (WTP) Report", 10, 20);
-    doc.setFontSize(12);
-    const wtpList = document.getElementById('wtpDetails').getElementsByTagName('li');
-    let yPosition = 30;
-    for (let li of wtpList) {
-        doc.text(li.innerText, 10, yPosition);
-        yPosition += 10;
-    }
-    doc.text(`* Indicates significant estimates (p < 0.05)`, 10, yPosition);
-
-    // Add a line break
-    doc.line(10, yPosition + 5, 200, yPosition + 5);
-
-    // Add WTP Chart as image
-    const wtpChartCanvas = document.getElementById('wtpChart');
-    const wtpChartURL = wtpChartCanvas.toDataURL('image/png', 1.0);
-    doc.text("WTP Chart:", 10, yPosition + 15);
-    doc.addImage(wtpChartURL, 'PNG', 10, yPosition + 20, 180, 90);
-
-    // Save PDF
-    doc.save('WTP_Report.pdf');
-
-    alert("WTP report downloaded successfully!");
-}
-
-// Feedback Form Submission Handler
-document.getElementById('feedbackForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const feedback = document.getElementById('feedback').value.trim();
-    if (feedback) {
-        // For demonstration, we'll just alert the feedback. 
-        // In a real application, you'd send this to a server.
-        alert("Thank you for your feedback!");
-        document.getElementById('feedbackForm').reset();
-    } else {
-        alert("Please enter your feedback before submitting.");
-    }
-});
