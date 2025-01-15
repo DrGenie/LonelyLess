@@ -159,19 +159,19 @@ button:hover {
     color: #2c3e50;
 }
 
-#programPackage h4, #costInformation h4 {
+#programPackage h4, #costInformation h4, #costInformation_moderately_lonely h4, #costInformation_severely_lonely h4 {
     color: #2980b9;
     margin-bottom: 15px;
 }
 
-#packageList, #costList {
+#packageList, #costList, #packageList_moderately_lonely, #costList_moderately_lonely, #packageList_severely_lonely, #costList_severely_lonely {
     list-style-type: disc;
     margin-left: 25px;
     font-size: 1em;
     color: #34495e;
 }
 
-#packageList li, #costList li {
+#packageList li, #costList li, #packageList_moderately_lonely li, #costList_moderately_lonely li, #packageList_severely_lonely li, #costList_severely_lonely li {
     margin-bottom: 8px;
 }
 
