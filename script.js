@@ -248,135 +248,8 @@ const costOfLivingMultipliers = {
     NT: 1.07   // Northern Territory
 };
 
-// Initialize Charts for Each Loneliness Category
-let probabilityCharts = {
-    not_lonely: initializeProbabilityChart('probabilityChart_not_lonely', 'Predicted Probability of Programme Uptake - Not Lonely'),
-    moderately_lonely: initializeProbabilityChart('probabilityChart_moderately_lonely', 'Predicted Probability of Programme Uptake - Moderately Lonely'),
-    severely_lonely: initializeProbabilityChart('probabilityChart_severely_lonely', 'Predicted Probability of Programme Uptake - Severely Lonely')
-};
-
-let cbaCharts = {
-    not_lonely: initializeCBAChart('cbaChart_not_lonely', 'Cost-Benefit Analysis - Not Lonely'),
-    moderately_lonely: initializeCBAChart('cbaChart_moderately_lonely', 'Cost-Benefit Analysis - Moderately Lonely'),
-    severely_lonely: initializeCBAChart('cbaChart_severely_lonely', 'Cost-Benefit Analysis - Severely Lonely')
-};
-
 // Initialize WTP Chart
 let wtpChart = initializeWTPChart('wtpChart', 'Willingness To Pay (AUD)');
-
-// Function to initialize Probability Chart
-function initializeProbabilityChart(canvasId, title) {
-    let ctx = document.getElementById(canvasId).getContext('2d');
-    return new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Uptake Probability', 'Remaining'],
-            datasets: [{
-                data: [0, 100],
-                backgroundColor: ['rgba(39, 174, 96, 0.6)', 'rgba(236, 240, 241, 0.3)'], // Green and Light Gray
-                borderColor: ['rgba(39, 174, 96, 1)', 'rgba(236, 240, 241, 1)'],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        font: {
-                            size: 14
-                        },
-                        color: '#34495e'
-                    }
-                },
-                title: {
-                    display: true,
-                    text: title,
-                    font: {
-                        size: 18
-                    },
-                    color: '#2c3e50'
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.label || '';
-                            let value = context.parsed;
-                            return `${label}: ${value}%`;
-                        }
-                    }
-                }
-            }
-        }
-    });
-}
-
-// Function to initialize CBA Chart
-function initializeCBAChart(canvasId, title) {
-    let ctx = document.getElementById(canvasId).getContext('2d');
-    return new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Total Costs', 'Total Benefits'],
-            datasets: [{
-                label: 'Amount (AUD)',
-                data: [0, 0],
-                backgroundColor: [
-                    'rgba(231, 76, 60, 0.6)', // Red for Costs
-                    'rgba(39, 174, 96, 0.6)'   // Green for Benefits
-                ],
-                borderColor: [
-                    'rgba(231, 76, 60, 1)',
-                    'rgba(39, 174, 96, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'AUD'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Categories'
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                },
-                title: {
-                    display: true,
-                    text: title,
-                    font: {
-                        size: 18
-                    },
-                    color: '#2c3e50'
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.dataset.label || '';
-                            let value = context.parsed.y;
-                            return `${label}: $${value.toLocaleString()} AUD`;
-                        }
-                    }
-                }
-            }
-        }
-    });
-}
 
 // Function to initialize WTP Chart
 function initializeWTPChart(canvasId, title) {
@@ -445,7 +318,7 @@ function initializeWTPChart(canvasId, title) {
     });
 }
 
-// Function to calculate predicted probability and update the charts and tables
+// Function to calculate predicted probability and WTP, then open results in new windows
 function calculateProbability() {
     // Get values from the form
     const state = document.getElementById('state_select').value;
@@ -542,9 +415,9 @@ function calculateProbability() {
         };
     });
 
-    // Display results for each category
+    // Display results for each category in new windows
     categories.forEach(category => {
-        displayResults(category, results[category]);
+        openResultWindow(category, results[category]);
     });
 
     // Calculate and display WTP results
@@ -629,61 +502,221 @@ function getSelectedAttributes() {
     return attributes;
 }
 
-// Function to display results for each category
-function displayResults(category, data) {
-    const probabilitySpan = document.getElementById(`probability_${category}`);
-    const interpretationsDiv = document.getElementById(`interpretations_${category}`);
-    const packageList = document.getElementById(`packageList_${category}`);
-    const costList = document.getElementById(`costList_${category}`);
-    const totalCostDisplay = document.getElementById(`totalCost_${category}`);
-    const totalBenefitsDisplay = document.getElementById(`totalBenefits_${category}`);
-    const netBenefitDisplay = document.getElementById(`netBenefit_${category}`);
-    const bcrDisplay = document.getElementById(`bcr_${category}`);
-    const cbaChart = cbaCharts[category];
-    const programPackageSection = document.getElementById(`programPackage_${category}`);
-    const costInformationSection = document.getElementById(`costInformation_${category}`);
+// Function to open result in new window
+function openResultWindow(category, data) {
+    // Create a new window
+    const resultWindow = window.open('', '_blank', 'width=800,height=800');
+    
+    // Build HTML content
+    const htmlContent = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <title>Result - ${formatCategoryName(category)}</title>
+            <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+            <style>
+                body {
+                    font-family: 'Roboto', sans-serif;
+                    background-color: #f0f4f8;
+                    margin: 20px;
+                    padding: 20px;
+                }
+                h1, h2, h3, h4 {
+                    text-align: center;
+                    color: #2c3e50;
+                }
+                p {
+                    font-size: 1.1em;
+                    color: #34495e;
+                }
+                ul {
+                    list-style-type: disc;
+                    margin-left: 25px;
+                    font-size: 1em;
+                    color: #34495e;
+                }
+                .chart-container {
+                    margin-top: 20px;
+                    width: 100%;
+                    height: 450px;
+                    background-color: #ffffff;
+                    padding: 25px;
+                    border: 2px solid #bdc3c7;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+                }
+                #probabilityChart {
+                    width: 100%;
+                    height: 300px;
+                    margin-top: 20px;
+                }
+                #cbaChart {
+                    width: 100%;
+                    height: 300px;
+                    margin-top: 20px;
+                }
+                button {
+                    padding: 10px 15px;
+                    background-color: #2980b9;
+                    color: #ffffff;
+                    border: none;
+                    font-size: 1em;
+                    cursor: pointer;
+                    border-radius: 6px;
+                    transition: background-color 0.3s ease, transform 0.2s ease;
+                    margin-top: 20px;
+                }
+                button:hover {
+                    background-color: #1f6391;
+                    transform: translateY(-2px);
+                }
+            </style>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        </head>
+        <body>
+            <h1>Result - ${formatCategoryName(category)}</h1>
+            <p><strong>Predicted Probability of Uptake:</strong> ${data.probability}</p>
+            <div class="chart-container">
+                <canvas id="probabilityChart" aria-label="Doughnut chart showing uptake probability for ${formatCategoryName(category)} group" role="img"></canvas>
+            </div>
+            <div id="interpretations" aria-live="polite">
+                ${generateInterpretations(data.P_final)}
+            </div>
+            <section id="programPackage">
+                <h3>Your Selected Programme Package:</h3>
+                <ul>${generateProgramPackage(data.selectedAttributes)}</ul>
+            </section>
+            <div id="costInformation">
+                <h3>Cost Analysis:</h3>
+                <ul>${generateCostList(data.selectedAttributes, state, adjustCosts)}</ul>
+                <p><strong>Total Estimated Cost:</strong> \$${calculateTotalCost(data.selectedAttributes, state, adjustCosts).toLocaleString()} AUD</p>
+            </div>
+            <div id="benefitInformation">
+                <h3>Benefit Analysis:</h3>
+                <p><strong>Total Estimated Benefits:</strong> \$${calculateBenefits(data.P_final).toLocaleString()} AUD</p>
+            </div>
+            <div id="cbaInformation">
+                <h3>Cost-Benefit Analysis:</h3>
+                <p><strong>Net Benefit:</strong> \$${(calculateBenefits(data.P_final) - calculateTotalCost(data.selectedAttributes, state, adjustCosts)).toLocaleString()} AUD</p>
+                <p><strong>Benefit-Cost Ratio:</strong> ${(calculateBenefits(data.P_final) / calculateTotalCost(data.selectedAttributes, state, adjustCosts)).toFixed(2)}</p>
+            </div>
+            <div class="chart-container">
+                <canvas id="cbaChart" aria-label="Bar chart showing Cost-Benefit Analysis for ${formatCategoryName(category)} group" role="img"></canvas>
+            </div>
+            <button onclick="window.close()" aria-label="Close this window">Close</button>
+            <script>
+                // Initialize Probability Chart
+                const probabilityCtx = document.getElementById('probabilityChart').getContext('2d');
+                new Chart(probabilityCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Uptake Probability', 'Remaining'],
+                        datasets: [{
+                            data: [${(data.P_final * 100).toFixed(2)}, ${(100 - (data.P_final * 100)).toFixed(2)}],
+                            backgroundColor: ['rgba(39, 174, 96, 0.6)', 'rgba(236, 240, 241, 0.3)'],
+                            borderColor: ['rgba(39, 174, 96, 1)', 'rgba(236, 240, 241, 1)'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: {
+                                        size: 14
+                                    },
+                                    color: '#34495e'
+                                }
+                            },
+                            title: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        let value = context.parsed;
+                                        return `${label}: ${value}%`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
 
-    // Update Probability
-    probabilitySpan.innerText = data.probability;
+                // Initialize CBA Chart
+                const cbaCtx = document.getElementById('cbaChart').getContext('2d');
+                new Chart(cbaCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Total Costs', 'Total Benefits'],
+                        datasets: [{
+                            label: 'Amount (AUD)',
+                            data: [${calculateTotalCost(data.selectedAttributes, state, adjustCosts)}, ${calculateBenefits(data.P_final)}],
+                            backgroundColor: [
+                                'rgba(231, 76, 60, 0.6)', // Red for Costs
+                                'rgba(39, 174, 96, 0.6)'   // Green for Benefits
+                            ],
+                            borderColor: [
+                                'rgba(231, 76, 60, 1)',
+                                'rgba(39, 174, 96, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'AUD'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Categories'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        let value = context.parsed.y;
+                                        return `${label}: $${value.toLocaleString()} AUD`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            </script>
+        </body>
+        </html>
+    `;
 
-    // Update Interpretations
-    interpretationsDiv.innerHTML = generateInterpretations(data.P_final, category);
-
-    // Update Program Package
-    packageList.innerHTML = generateProgramPackage(data.selectedAttributes);
-
-    // Show or hide download buttons based on package selection
-    const downloadPackageBtn = programPackageSection.querySelector('button[onclick^="downloadPackage"]');
-    const downloadChartBtn = programPackageSection.querySelector('button[onclick^="downloadChart"]');
-    if (packageList.children.length > 0) {
-        downloadPackageBtn.style.display = 'inline-block';
-        downloadChartBtn.style.display = 'inline-block';
-    } else {
-        downloadPackageBtn.style.display = 'none';
-        downloadChartBtn.style.display = 'none';
-    }
-
-    // Calculate and Display Costs
-    const state = document.getElementById('state_select').value;
-    const adjustCosts = document.getElementById('adjust_costs').value;
-    const selectedAttributes = data.selectedAttributes;
-    const grandTotal = calculateTotalCost(selectedAttributes, state, adjustCosts);
-    displayCosts(costList, grandTotal, category);
-
-    // Calculate and Display Benefits
-    const benefits = calculateBenefits(data.P_final);
-    displayBenefits(totalBenefitsDisplay, benefits, category);
-
-    // Display Cost-Benefit Analysis
-    displayCBA(grandTotal, benefits, category);
-
-    // Update CBA Chart
-    cbaChart.data.datasets[0].data = [grandTotal, benefits];
-    cbaChart.update();
+    // Write HTML content to the new window
+    resultWindow.document.write(htmlContent);
+    resultWindow.document.close();
 }
 
 // Function to generate brief interpretations based on probability and category
-function generateInterpretations(probability, category) {
+function generateInterpretations(probability) {
     let interpretation = '';
 
     if (probability < 0.3) {
@@ -697,145 +730,60 @@ function generateInterpretations(probability, category) {
     return interpretation;
 }
 
-// Function to calculate benefits based on probability
-function calculateBenefits(probability) {
-    const benefit = probability * 100 * benefitPerPercent;
-    return benefit;
-}
+// Function to generate Cost List for the result window
+function generateCostList(attributes, state, adjustCosts) {
+    let costList = '';
+    let totalCost = 0;
 
-// Function to display cost information
-function displayCosts(costList, grandTotal, category) {
-    const totalCostDisplay = document.getElementById(`totalCost_${category}`);
-
-    // Clear Previous Costs
-    costList.innerHTML = '';
-
-    // Populate Cost Components
-    const selectedAttributes = getSelectedAttributes();
-    selectedAttributes.forEach(attr => {
+    attributes.forEach(attr => {
         const costs = costData[attr];
         for (let key in costs) {
             if (costs[key] > 0) {
-                const listItem = document.createElement('li');
-                listItem.innerText = `${capitalizeFirstLetter(key)}: \$${costs[key].toLocaleString()}`;
-                costList.appendChild(listItem);
+                costList += `<li>${capitalizeFirstLetter(key)}: \$${costs[key].toLocaleString()}</li>`;
+                totalCost += costs[key];
             }
         }
     });
 
-    // Display Grand Total
-    totalCostDisplay.innerText = grandTotal.toLocaleString();
-}
-
-// Function to display benefits
-function displayBenefits(displayElement, benefits, category) {
-    displayElement.innerText = benefits.toLocaleString();
-}
-
-// Function to display Cost-Benefit Analysis
-function displayCBA(totalCost, benefits, category) {
-    const netBenefit = benefits - totalCost;
-    const bcr = benefits / totalCost;
-
-    const netBenefitDisplay = document.getElementById(`netBenefit_${category}`);
-    const bcrDisplay = document.getElementById(`bcr_${category}`);
-
-    // Update CBA
-    netBenefitDisplay.innerText = netBenefit.toLocaleString();
-    bcrDisplay.innerText = bcr.toFixed(2);
-}
-
-// Function to capitalize first letter
-function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
-// Function to download programme package as a text file
-function downloadPackage(category) {
-    const packageList = document.getElementById(`packageList_${category}`);
-    if (packageList.children.length === 0) {
-        alert("No programme package selected to download.");
-        return;
+    // Apply Cost-of-Living Adjustment if applicable
+    if (adjustCosts === 'yes' && state && costOfLivingMultipliers[state]) {
+        totalCost = totalCost * costOfLivingMultipliers[state];
     }
 
-    let packageText = 'Selected Programme Package:\n';
-    for (let li of packageList.children) {
-        packageText += li.innerText + '\n';
+    // Update total cost display
+    document.getElementById(`totalCost_${category}`).innerText = totalCost.toLocaleString();
+
+    return costList;
+}
+
+// Function to calculate total cost with state adjustment
+function calculateTotalCost(attributes, state, adjustCosts) {
+    let totalCost = 0;
+
+    attributes.forEach(attr => {
+        const costs = costData[attr];
+        for (let key in costs) {
+            if (costs[key] > 0) {
+                totalCost += costs[key];
+            }
+        }
+    });
+
+    // Apply Cost-of-Living Adjustment if applicable
+    if (adjustCosts === 'yes' && state && costOfLivingMultipliers[state]) {
+        totalCost = totalCost * costOfLivingMultipliers[state];
     }
 
-    const blob = new Blob([packageText], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Programme_Package_${capitalizeWords(category.replace('_', ' '))}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-
-    alert("Programme Package downloaded successfully!");
+    return totalCost;
 }
 
-// Function to download the Uptake Probability chart as an image
-function downloadChart(category) {
-    const canvas = document.getElementById(`probabilityChart_${category}`);
-    const link = document.createElement('a');
-    link.href = canvas.toDataURL('image/png');
-    link.download = `Uptake_Probability_Chart_${capitalizeWords(category.replace('_', ' '))}.png`;
-    link.click();
-    
-    alert("Uptake Probability chart downloaded successfully!");
+// Function to calculate benefits based on probability
+function calculateBenefits(probability) {
+    const benefits = probability * 100 * benefitPerPercent;
+    return benefits;
 }
 
-// Function to download CBA report as PDF
-function downloadCBAPDF(category) {
-    const state = document.getElementById('state_select').value;
-    const adjustCosts = document.getElementById('adjust_costs').value;
-    const totalCost = parseFloat(document.getElementById(`totalCost_${category}`).innerText.replace(/,/g, ''));
-    const P_final = parseFloat(document.getElementById(`probability_${category}`).innerText.replace('%', '')) / 100;
-    const benefits = parseFloat(document.getElementById(`totalBenefits_${category}`).innerText.replace(/,/g, ''));
-    const netBenefit = benefits - totalCost;
-    const bcr = benefits / totalCost;
-
-    // Initialize jsPDF
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-
-    doc.setFontSize(16);
-    doc.text("LonelyLessAustralia - Cost-Benefit Analysis Report", 10, 20);
-    doc.setFontSize(12);
-    doc.text(`Loneliness Category: ${formatCategoryName(category)}`, 10, 30);
-    doc.text(`Selected State: ${state ? state : 'N/A'}`, 10, 40);
-    doc.text(`Adjust Costs for Living Expenses: ${adjustCosts === 'yes' ? 'Yes' : 'No'}`, 10, 50);
-    doc.text(`Total Estimated Cost: $${totalCost.toLocaleString()} AUD`, 10, 60);
-    doc.text(`Total Estimated Benefits: $${benefits.toLocaleString()} AUD`, 10, 70);
-    doc.text(`Net Benefit: $${netBenefit.toLocaleString()} AUD`, 10, 80);
-    doc.text(`Benefit-Cost Ratio: ${bcr.toFixed(2)}`, 10, 90);
-    
-    // Add a line break
-    doc.line(10, 95, 200, 95);
-
-    // Add charts as images
-    const probabilityChart = document.getElementById(`probabilityChart_${category}`);
-    const cbaChart = document.getElementById(`cbaChart_${category}`);
-
-    // Convert charts to images
-    const probabilityChartURL = probabilityChart.toDataURL('image/png', 1.0);
-    const cbaChartURL = cbaChart.toDataURL('image/png', 1.0);
-
-    // Add Probability Chart
-    doc.text("Uptake Probability Chart:", 10, 105);
-    doc.addImage(probabilityChartURL, 'PNG', 10, 110, 60, 60);
-
-    // Add CBA Chart
-    doc.text("Cost-Benefit Analysis Chart:", 80, 105);
-    doc.addImage(cbaChartURL, 'PNG', 80, 110, 60, 60);
-
-    // Save PDF
-    doc.save(`CBA_Report_${capitalizeWords(category.replace('_', ' '))}.pdf`);
-
-    alert("Cost-Benefit Analysis report downloaded successfully!");
-}
-
-// Helper Function to format category names
+// Function to format category names
 function formatCategoryName(category) {
     switch(category) {
         case 'not_lonely':
@@ -849,7 +797,7 @@ function formatCategoryName(category) {
     }
 }
 
-// Helper Function to capitalize each word
+// Function to capitalize each word
 function capitalizeWords(str) {
     return str.replace(/\b\w/g, char => char.toUpperCase());
 }
@@ -906,7 +854,7 @@ function downloadWTPReport() {
     const wtpChartCanvas = document.getElementById('wtpChart');
     const wtpChartURL = wtpChartCanvas.toDataURL('image/png', 1.0);
     doc.text("WTP Chart:", 10, yPosition + 15);
-    doc.addImage(wtpChartURL, 'PNG', 10, yPosition + 20, 60, 60);
+    doc.addImage(wtpChartURL, 'PNG', 10, yPosition + 20, 180, 90);
 
     // Save PDF
     doc.save('WTP_Report.pdf');
@@ -927,8 +875,3 @@ document.getElementById('feedbackForm').addEventListener('submit', function(even
         alert("Please enter your feedback before submitting.");
     }
 });
-
-// Function to ensure all charts are initialized on page load
-window.onload = function() {
-    // No additional initialization needed as charts are already initialized
-};
