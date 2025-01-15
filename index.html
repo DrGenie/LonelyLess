@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LonelyLess - Decision Aid Tool</title>
+    <title>AussieConnect Plus - Decision Aid Tool</title>
     <!-- Link to external CSS -->
     <link rel="stylesheet" href="styles.css">
     <!-- Google Fonts for better typography -->
@@ -18,7 +18,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>LonelyLess Decision Aid Tool</h1>
+            <h1>AussieConnect Plus Decision Aid Tool</h1>
         </header>
         
         <!-- Introduction Section -->
@@ -30,13 +30,13 @@
         <!-- Instructions Section -->
         <section class="instructions" aria-labelledby="instructions-heading">
             <h2 id="instructions-heading">How to Use This Tool</h2>
-            <p>Welcome to LonelyLess! This tool is designed to help you assess the likelihood of program uptake aimed at reducing loneliness among older adults in Australia. Follow the steps below to get your predicted probability:</p>
+            <p>Welcome to AussieConnect Plus! This tool is designed to help you assess the likelihood of program uptake aimed at reducing loneliness among older adults in Australia. Follow the steps below to get your predicted probability:</p>
             <ol>
                 <li>Select your preferences from the drop-down menus provided.</li>
                 <li>Click the <strong>"Calculate Probability"</strong> button to see your results.</li>
                 <li>Review the predicted probability, your selected program package, and the cost-benefit analysis.</li>
                 <li>Download your selected program package and Uptake Probability chart for future reference.</li>
-                <li>Click the <strong>"View Results by Loneliness Category"</strong> button to see segmented analyses.</li>
+                <li>Use the buttons below to view detailed analyses by loneliness category and WTP.</li>
             </ol>
             <p>These support programs are essential in fostering community engagement and enhancing the well-being of our senior population.</p>
         </section>
@@ -233,11 +233,8 @@
                 </div>
             </fieldset>
     
-            <!-- Submit Buttons -->
+            <!-- Submit Button -->
             <button type="button" onclick="calculateProbability()" aria-label="Calculate the probability of program uptake">Calculate Probability</button>
-            
-            <!-- View Results by Loneliness Category Button -->
-            <button type="button" onclick="viewByLonelinessCategory()" aria-label="View results by loneliness category" id="viewCategoryBtn">View Results by Loneliness Category</button>
         </form>
     
         <!-- Display Result Section -->
@@ -291,6 +288,12 @@
             <div id="probabilityChartSummary" class="sr-only">
                 <p>The Uptake Probability chart displays the likelihood of program uptake compared to the remaining probability.</p>
             </div>
+        </div>
+    
+        <!-- Buttons for Detailed Analyses -->
+        <div class="analysis-buttons">
+            <button onclick="openCategoryResults()" aria-label="View detailed results by loneliness category">View Results by Loneliness Category</button>
+            <button onclick="openWTP()" aria-label="View Willingness To Pay analysis">View Willingness To Pay (WTP)</button>
         </div>
     
         <!-- Feedback Section -->
