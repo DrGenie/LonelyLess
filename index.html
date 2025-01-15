@@ -262,7 +262,21 @@
             </div>
             <button onclick="downloadWTPReport()" aria-label="Download the WTP report as PDF">Download WTP Report as PDF</button>
         </section>
-    
+    <!-- WTP Results Section -->
+<section id="wtpResults" aria-labelledby="wtp-results-heading">
+    <h2 id="wtp-results-heading">Willingness To Pay (WTP) Results</h2>
+    <div class="chart-container">
+        <canvas id="wtpChart" aria-label="Bar chart showing WTP results" role="img"></canvas>
+        <div id="wtpChartSummary" class="sr-only">
+            <p>The WTP chart displays the willingness to pay for the selected programme packages across different loneliness categories.</p>
+        </div>
+    </div>
+    <div id="wtpDetails" aria-live="polite">
+        <!-- Dynamic WTP details will appear here -->
+    </div>
+    <button onclick="downloadWTPReport()" aria-label="Download the WTP report as PDF">Download WTP Report as PDF</button>
+</section>
+
         <!-- Feedback Section -->
         <section class="feedback" aria-labelledby="feedback-heading">
             <h3 id="feedback-heading">Feedback</h3>
