@@ -4,21 +4,22 @@
     <meta charset="UTF-8">
     <title>LonelyLessAustralia Decision Aid Tool</title>
     <link rel="stylesheet" href="styles.css">
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- jsPDF CDN -->
+    <!-- Include jsPDF Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- html2canvas CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Include Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <header>
         <h1>LonelyLessAustralia Decision Aid Tool</h1>
     </header>
 
+    <section id="description">
+        <p>Loneliness affects over five million Australians, especially older adults, leading to significant health and economic challenges. This online decision aid tool is developed from a discrete choice experiment that identified older adults' preferences for various support programs designed to reduce loneliness in Australia. Utilising the DCE’s insights and estimates, the tool predicts the probability of uptake for different program packages, enabling personalised support services based on the key factors older adults consider when seeking social connection.</p>
+    </section>
+
     <section id="instructions">
         <h2>How to Use This Tool</h2>
-        <p>Welcome to LonelyLessAustralia! This tool is designed to help you assess the likelihood of program uptake aimed at reducing loneliness among older adults in Australia. Follow the steps below to get your predicted probability of program uptake:</p>
         <ol>
             <li>Select your preferences from the drop-down menus provided.</li>
             <li>Click the "Calculate Probability" button to see your results.</li>
@@ -29,156 +30,159 @@
         <p>These support programs are essential in fostering community engagement and improving the well-being of our older adult population.</p>
     </section>
 
-    <section id="form-section">
+    <section id="decisionForm">
         <form id="decisionForm">
-            <h2>Select Program Attributes</h2>
-            
-            <div class="form-group">
-                <label for="type_comm">Community Engagement:</label>
-                <select id="type_comm">
-                    <option value="0">No</option>
-                    <option value="1">Yes</option>
-                </select>
-            </div>
+            <!-- State Selection -->
+            <label for="state_select">Select State:</label>
+            <select id="state_select" required>
+                <option value="">--Select State--</option>
+                <option value="NSW">New South Wales</option>
+                <option value="VIC">Victoria</option>
+                <option value="QLD">Queensland</option>
+                <option value="WA">Western Australia</option>
+                <option value="SA">South Australia</option>
+                <option value="TAS">Tasmania</option>
+                <option value="ACT">Australian Capital Territory</option>
+                <option value="NT">Northern Territory</option>
+            </select>
+            <span class="tooltip">Select your state to adjust costs for living expenses if applicable.</span>
+            <br><br>
 
-            <div class="form-group">
-                <label for="type_psych">Psychological Counselling:</label>
-                <select id="type_psych">
-                    <option value="0">No</option>
-                    <option value="1">Yes</option>
-                </select>
-            </div>
+            <!-- Adjust Costs for Living Expenses -->
+            <label for="adjust_costs">Adjust Costs for Living Expenses:</label>
+            <select id="adjust_costs" required>
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+            </select>
+            <span class="tooltip">Choose 'Yes' to adjust costs based on your state's cost of living.</span>
+            <br><br>
 
-            <div class="form-group">
-                <label for="type_vr">Virtual Reality:</label>
-                <select id="type_vr">
-                    <option value="0">No</option>
-                    <option value="1">Yes</option>
-                </select>
-            </div>
+            <!-- Cost Continuum -->
+            <label for="cost_cont">Cost Continuum (AUD per session):</label>
+            <input type="number" id="cost_cont" min="0" step="0.01" required>
+            <span class="tooltip">Enter the cost per session in Australian Dollars.</span>
+            <br><br>
 
-            <div class="form-group">
-                <label for="mode_virtual">Program Mode - Virtual:</label>
-                <select id="mode_virtual">
-                    <option value="0">No</option>
-                    <option value="1">Yes</option>
-                </select>
-            </div>
+            <!-- Program Attributes -->
+            <!-- Community Engagement -->
+            <label for="type_comm">Community Engagement:</label>
+            <select id="type_comm" required>
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+            </select>
+            <span class="tooltip">Includes activities that promote social interaction within the community.</span>
+            <br><br>
 
-            <div class="form-group">
-                <label for="mode_hybrid">Program Mode - Hybrid:</label>
-                <select id="mode_hybrid">
-                    <option value="0">No</option>
-                    <option value="1">Yes</option>
-                </select>
-            </div>
+            <!-- Psychological Counselling -->
+            <label for="type_psych">Psychological Counselling:</label>
+            <select id="type_psych" required>
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+            </select>
+            <span class="tooltip">Provides mental health support and counselling services.</span>
+            <br><br>
 
-            <div class="form-group">
-                <label for="freq_weekly">Frequency - Weekly:</label>
-                <select id="freq_weekly">
-                    <option value="0">No</option>
-                    <option value="1">Yes</option>
-                </select>
-            </div>
+            <!-- Virtual Reality -->
+            <label for="type_vr">Virtual Reality:</label>
+            <select id="type_vr" required>
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+            </select>
+            <span class="tooltip">Utilises virtual reality technology to simulate social environments.</span>
+            <br><br>
 
-            <div class="form-group">
-                <label for="freq_monthly">Frequency - Monthly:</label>
-                <select id="freq_monthly">
-                    <option value="0">No</option>
-                    <option value="1">Yes</option>
-                </select>
-            </div>
+            <!-- Mode of Delivery -->
+            <label for="mode_virtual">Virtual Mode:</label>
+            <select id="mode_virtual" required>
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+            </select>
+            <span class="tooltip">Programs delivered entirely online.</span>
+            <br><br>
 
-            <div class="form-group">
-                <label for="dur_2hrs">Duration - 2 Hours:</label>
-                <select id="dur_2hrs">
-                    <option value="0">No</option>
-                    <option value="1">Yes</option>
-                </select>
-            </div>
+            <label for="mode_hybrid">Hybrid Mode:</label>
+            <select id="mode_hybrid" required>
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+            </select>
+            <span class="tooltip">Combination of in-person and online sessions.</span>
+            <br><br>
 
-            <div class="form-group">
-                <label for="dur_4hrs">Duration - 4 Hours:</label>
-                <select id="dur_4hrs">
-                    <option value="0">No</option>
-                    <option value="1">Yes</option>
-                </select>
-            </div>
+            <!-- Frequency of Sessions -->
+            <label for="freq_weekly">Weekly Frequency:</label>
+            <select id="freq_weekly" required>
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+            </select>
+            <span class="tooltip">Programs that occur weekly.</span>
+            <br><br>
 
-            <div class="form-group">
-                <label for="dist_local">Local Area Accessibility:</label>
-                <select id="dist_local">
-                    <option value="0">No</option>
-                    <option value="1">Yes</option>
-                </select>
-            </div>
+            <label for="freq_monthly">Monthly Frequency:</label>
+            <select id="freq_monthly" required>
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+            </select>
+            <span class="tooltip">Programs that occur monthly.</span>
+            <br><br>
 
-            <div class="form-group">
-                <label for="dist_signif">Wider Community Accessibility:</label>
-                <select id="dist_signif">
-                    <option value="0">No</option>
-                    <option value="1">Yes</option>
-                </select>
-            </div>
+            <!-- Duration of Sessions -->
+            <label for="dur_2hrs">2-Hour Duration:</label>
+            <select id="dur_2hrs" required>
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+            </select>
+            <span class="tooltip">Each session lasts 2 hours.</span>
+            <br><br>
 
-            <div class="form-group">
-                <label for="cost_cont">Cost Continuum:</label>
-                <select id="cost_cont">
-                    <option value="1">Standard</option>
-                    <option value="1.2">High</option>
-                    <option value="0.8">Low</option>
-                </select>
-            </div>
+            <label for="dur_4hrs">4-Hour Duration:</label>
+            <select id="dur_4hrs" required>
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+            </select>
+            <span class="tooltip">Each session lasts 4 hours.</span>
+            <br><br>
 
-            <div class="form-group">
-                <label for="state_select">Select State:</label>
-                <select id="state_select">
-                    <option value="">-- Select State --</option>
-                    <option value="NSW">New South Wales</option>
-                    <option value="VIC">Victoria</option>
-                    <option value="QLD">Queensland</option>
-                    <option value="WA">Western Australia</option>
-                    <option value="SA">South Australia</option>
-                    <option value="TAS">Tasmania</option>
-                    <option value="ACT">Australian Capital Territory</option>
-                    <option value="NT">Northern Territory</option>
-                </select>
-            </div>
+            <!-- Accessibility Options -->
+            <label for="dist_local">Local Area Accessibility:</label>
+            <select id="dist_local" required>
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+            </select>
+            <span class="tooltip">Programs accessible within the local community area.</span>
+            <br><br>
 
-            <div class="form-group">
-                <label for="adjust_costs">Adjust Costs for Living Expenses:</label>
-                <select id="adjust_costs">
-                    <option value="no">No</option>
-                    <option value="yes">Yes</option>
-                </select>
-            </div>
+            <label for="dist_signif">Wider Community Accessibility:</label>
+            <select id="dist_signif" required>
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+            </select>
+            <span class="tooltip">Programs accessible to the wider community beyond the local area.</span>
+            <br><br>
 
+            <!-- Submit Button -->
             <button type="button" onclick="calculateProbability()">Calculate Probability</button>
         </form>
     </section>
 
-    <section id="results-section">
+    <section id="results">
         <h2>Results</h2>
-        <p><strong>Predicted Uptake Probability:</strong> <span id="probability">--</span></p>
+        <p>Predicted Uptake Probability: <span id="probability">--</span></p>
         <div class="chart-container">
             <canvas id="probabilityChart"></canvas>
         </div>
-
-        <h3>Selected Program Package:</h3>
+        
+        <h3>Program Package:</h3>
         <ul id="packageList">
-            <!-- Selected attributes will be listed here -->
+            <!-- Selected program package items will be listed here -->
         </ul>
         <button id="downloadPackageBtn" onclick="downloadPackage()" style="display:none;">Download Program Package</button>
         <button id="downloadChartBtn" onclick="downloadChart()" style="display:none;">Download Uptake Probability Chart</button>
-        <button id="downloadCBAPDFBtn" onclick="downloadCBAPDF()" style="display:none;">Download Enhanced CBA Report (PDF)</button>
 
-        <div id="costInformation">
-            <h3>Cost Breakdown:</h3>
-            <ul id="costList">
-                <!-- Cost components will be listed here -->
-            </ul>
-            <p><strong>Grand Total:</strong> $<span id="totalCost">--</span> AUD</p>
-        </div>
+        <h3>Cost Information:</h3>
+        <ul id="costList">
+            <!-- Cost items will be listed here -->
+        </ul>
+        <p><strong>Total Cost:</strong> $<span id="totalCost">--</span> AUD</p>
 
         <div id="benefits">
             <h3>Benefit Analysis:</h3>
@@ -189,32 +193,29 @@
             <h3>Cost-Benefit Analysis:</h3>
             <p><strong>Net Benefit:</strong> <span id="netBenefit">--</span> AUD</p>
             <p><strong>Benefit-Cost Ratio:</strong> <span id="bcr">--</span></p>
+            <div class="chart-container">
+                <canvas id="cbaChart"></canvas>
+            </div>
+            <button onclick="downloadCBAPDF()">Download CBA Report</button>
         </div>
 
-        <div class="chart-container">
-            <canvas id="cbaChart"></canvas>
+        <div id="interpretations">
+            <!-- Interpretations based on probability will be displayed here -->
         </div>
+
+        <button onclick="openCategoryResults()">View Detailed Analyses by Loneliness Category</button>
+        <button onclick="openWTP()">View Willingness To Pay (WTP) Analysis</button>
     </section>
 
-    <section id="interpretations">
-        <!-- Brief interpretations based on probability will appear here -->
-    </section>
-
-    <section id="actions">
-        <button onclick="openCategoryResults()">View Results by Loneliness Categories</button>
-        <button onclick="openWTP()">Open WTP Report</button>
-    </section>
-
-    <section class="feedback-section">
-        <h2>Provide Your Feedback</h2>
+    <section id="feedback">
+        <h2>Feedback</h2>
         <form id="feedbackForm">
-            <textarea id="feedback" placeholder="Enter your feedback here..."></textarea>
-            <br>
+            <label for="feedback">Your Feedback:</label><br>
+            <textarea id="feedback" name="feedback" rows="4" cols="50" placeholder="Enter your feedback here..."></textarea><br>
             <button type="submit">Submit Feedback</button>
         </form>
     </section>
 
-    <!-- Include the updated script.js -->
     <script src="script.js"></script>
 </body>
 </html>
