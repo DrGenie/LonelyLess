@@ -1,6 +1,6 @@
 /* script.js */
 
-// Model Coefficients for Main Study
+// Model Coefficients for Final DCE Study (Table 3)
 const mainCoefficients = {
     ASC_alt1: -0.112,
     ASC_optout: 0.131,
@@ -15,7 +15,7 @@ const mainCoefficients = {
     dur_4hrs: 0.213,
     dist_local: 0.059,
     dist_signif: -0.036, // Updated to match new coefficient
-    cost_cont: -0.036 // Assuming this remains as per Table 3
+    cost_cont: -0.036 // From Table 3
 };
 
 // Model Coefficients by Loneliness Categories (Table 5)
@@ -34,7 +34,24 @@ const categoryCoefficients = {
         dur_4hrs: 0.243,
         dist_local: -0.041,
         dist_signif: -0.814,
-        cost_cont: -0.034
+        cost_cont: -0.034,
+        // Significance flags (true if p < 0.05)
+        significance: {
+            ASC_alt1: false,
+            ASC_optout: false,
+            type_comm: true,
+            type_psych: false,
+            type_vr: true,
+            mode_virtual: true,
+            mode_hybrid: true,
+            freq_weekly: true,
+            freq_monthly: true,
+            dur_2hrs: false,
+            dur_4hrs: true,
+            dist_local: false,
+            dist_signif: true,
+            cost_cont: true
+        }
     },
     moderately_lonely: {
         ASC_alt1: -0.145,
@@ -50,7 +67,24 @@ const categoryCoefficients = {
         dur_4hrs: 0.266,
         dist_local: 0.082,
         dist_signif: -0.467,
-        cost_cont: -0.042
+        cost_cont: -0.042,
+        // Significance flags (true if p < 0.05)
+        significance: {
+            ASC_alt1: false,
+            ASC_optout: false,
+            type_comm: true,
+            type_psych: false,
+            type_vr: false,
+            mode_virtual: false,
+            mode_hybrid: true,
+            freq_weekly: true,
+            freq_monthly: true,
+            dur_2hrs: true,
+            dur_4hrs: true,
+            dist_local: false,
+            dist_signif: true,
+            cost_cont: true
+        }
     },
     severely_lonely: {
         ASC_alt1: -0.028,
@@ -66,11 +100,28 @@ const categoryCoefficients = {
         dur_4hrs: 0.060,
         dist_local: 0.211,
         dist_signif: -0.185,
-        cost_cont: -0.033
+        cost_cont: -0.033,
+        // Significance flags (true if p < 0.05)
+        significance: {
+            ASC_alt1: false,
+            ASC_optout: false,
+            type_comm: true,
+            type_psych: true,
+            type_vr: true,
+            mode_virtual: true,
+            mode_hybrid: false,
+            freq_weekly: true,
+            freq_monthly: false,
+            dur_2hrs: false,
+            dur_4hrs: false,
+            dist_local: false,
+            dist_signif: false,
+            cost_cont: true
+        }
     }
 };
 
-// Cost Data for Each Program Attribute
+// Cost Data for Each Programme Attribute
 const costData = {
     type_comm: {
         personnel: 20000,
@@ -200,9 +251,9 @@ const costOfLivingMultipliers = {
 
 // Initialize Charts for Each Loneliness Category
 let charts = {
-    not_lonely: initializeProbabilityChart('probabilityChart_not_lonely', 'Predicted Probability of Program Uptake - Not Lonely'),
-    moderately_lonely: initializeProbabilityChart('probabilityChart_moderately_lonely', 'Predicted Probability of Program Uptake - Moderately Lonely'),
-    severely_lonely: initializeProbabilityChart('probabilityChart_severely_lonely', 'Predicted Probability of Program Uptake - Severely Lonely')
+    not_lonely: initializeProbabilityChart('probabilityChart_not_lonely', 'Predicted Probability of Programme Uptake - Not Lonely'),
+    moderately_lonely: initializeProbabilityChart('probabilityChart_moderately_lonely', 'Predicted Probability of Programme Uptake - Moderately Lonely'),
+    severely_lonely: initializeProbabilityChart('probabilityChart_severely_lonely', 'Predicted Probability of Programme Uptake - Severely Lonely')
 };
 
 let cbaCharts = {
@@ -450,7 +501,8 @@ function calculateProbability() {
             P_final: P_final,
             WTP: WTP.toLocaleString(),
             selectedAttributes: selectedAttributes,
-            category: category
+            category: category,
+            significance: coef.significance
         };
     });
 
@@ -466,7 +518,7 @@ function calculateProbability() {
     updateWTPChart(results);
 }
 
-// Function to generate program package list with user-friendly labels
+// Function to generate programme package list with user-friendly labels
 function generateProgramPackage(attributes) {
     const packageList = [];
     const form = document.getElementById('decisionForm');
@@ -504,7 +556,7 @@ function calculateTotalCost(selectedAttributes, state, adjustCosts) {
     
     selectedAttributes.forEach(attr => {
         const costs = costData[attr];
-        for (let key in totalCost) {
+        for (let key in costs) {
             if (costs[key]) {
                 totalCost[key] += costs[key];
             }
@@ -554,7 +606,7 @@ function displayResults(category, data) {
     const cbaChart = cbaCharts[category];
     const programPackageSection = document.getElementById(`programPackage_${category}`);
     const costInformationSection = document.getElementById(`costInformation_${category}`);
-    
+
     // Update Probability
     probabilitySpan.innerText = data.probability;
 
@@ -565,7 +617,7 @@ function displayResults(category, data) {
     packageList.innerHTML = generateProgramPackage(data.selectedAttributes);
 
     // Show or hide download buttons based on package selection
-    const downloadPackageBtn = programPackageSection.querySelector('button[aria-label^="Download Program Package"]');
+    const downloadPackageBtn = programPackageSection.querySelector('button[aria-label^="Download Programme Package"]');
     const downloadChartBtn = programPackageSection.querySelector('button[aria-label^="Download the Uptake Probability chart"]');
     if (packageList.children.length > 0) {
         downloadPackageBtn.style.display = 'inline-block';
@@ -599,11 +651,11 @@ function generateInterpretations(probability, category) {
     let interpretation = '';
 
     if (probability < 0.3) {
-        interpretation = `<p>Your selected support programs have a low probability of uptake (<30%). This suggests that the current configuration may not be attractive to older adults. Consider revising the program features to better meet the needs and preferences of your target population.</p>`;
+        interpretation = `<p>Your selected support programmes have a low probability of uptake (<30%). This suggests that the current configuration may not be attractive to older adults. Consider revising the programme features to better meet the needs and preferences of your target population.</p>`;
     } else if (probability >= 0.3 && probability < 0.7) {
-        interpretation = `<p>Your selected support programs have a moderate probability of uptake (30%-70%). While there is potential interest, there is room for improvement. Enhancing certain program features could increase engagement and participation rates.</p>`;
+        interpretation = `<p>Your selected support programmes have a moderate probability of uptake (30%-70%). While there is potential interest, there is room for improvement. Enhancing certain programme features could increase engagement and participation rates.</p>`;
     } else {
-        interpretation = `<p>Your selected support programs have a high probability of uptake (>70%). This indicates strong acceptance and interest from older adults. Maintaining and promoting these program features is recommended to maximise impact.</p>`;
+        interpretation = `<p>Your selected support programmes have a high probability of uptake (>70%). This indicates strong acceptance and interest from older adults. Maintaining and promoting these programme features is recommended to maximise impact.</p>`;
     }
 
     return interpretation;
@@ -662,15 +714,15 @@ function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-// Function to download program package as a text file
+// Function to download programme package as a text file
 function downloadPackage(category) {
     const packageList = document.getElementById(`packageList_${category}`);
     if (packageList.children.length === 0) {
-        alert("No program package selected to download.");
+        alert("No programme package selected to download.");
         return;
     }
 
-    let packageText = 'Selected Program Package:\n';
+    let packageText = 'Selected Programme Package:\n';
     for (let li of packageList.children) {
         packageText += li.innerText + '\n';
     }
@@ -679,11 +731,11 @@ function downloadPackage(category) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Program_Package_${category.replace('_', ' ').toUpperCase()}.txt`;
+    a.download = `Programme_Package_${capitalizeWords(category.replace('_', ' '))}.txt`;
     a.click();
     URL.revokeObjectURL(url);
 
-    alert("Program Package downloaded successfully!");
+    alert("Programme Package downloaded successfully!");
 }
 
 // Function to download the Uptake Probability chart as an image
@@ -691,7 +743,7 @@ function downloadChart(category) {
     const canvas = document.getElementById(`probabilityChart_${category}`);
     const link = document.createElement('a');
     link.href = canvas.toDataURL('image/png');
-    link.download = `Uptake_Probability_Chart_${category.replace('_', ' ').toUpperCase()}.png`;
+    link.download = `Uptake_Probability_Chart_${capitalizeWords(category.replace('_', ' '))}.png`;
     link.click();
     
     alert("Uptake Probability chart downloaded successfully!");
@@ -722,7 +774,27 @@ function downloadCBAPDF(category) {
     doc.text(`Net Benefit: $${netBenefit.toLocaleString()} AUD`, 10, 80);
     doc.text(`Benefit-Cost Ratio: ${bcr.toFixed(2)}`, 10, 90);
     
-    doc.save(`CBA_Report_${category.replace('_', ' ').toUpperCase()}.pdf`);
+    // Add a line break
+    doc.line(10, 95, 200, 95);
+
+    // Add charts as images
+    const probabilityChart = document.getElementById(`probabilityChart_${category}`);
+    const cbaChart = document.getElementById(`cbaChart_${category}`);
+
+    // Convert charts to images
+    const probabilityChartURL = probabilityChart.toDataURL('image/png', 1.0);
+    const cbaChartURL = cbaChart.toDataURL('image/png', 1.0);
+
+    // Add Probability Chart
+    doc.text("Uptake Probability Chart:", 10, 105);
+    doc.addImage(probabilityChartURL, 'PNG', 10, 110, 60, 60);
+
+    // Add CBA Chart
+    doc.text("Cost-Benefit Analysis Chart:", 80, 105);
+    doc.addImage(cbaChartURL, 'PNG', 80, 110, 60, 60);
+
+    // Save PDF
+    doc.save(`CBA_Report_${capitalizeWords(category.replace('_', ' '))}.pdf`);
 
     alert("Cost-Benefit Analysis report downloaded successfully!");
 }
@@ -737,8 +809,13 @@ function formatCategoryName(category) {
         case 'severely_lonely':
             return 'Severely Lonely';
         default:
-            return category;
+            return capitalizeWords(category.replace('_', ' '));
     }
+}
+
+// Helper Function to capitalize each word
+function capitalizeWords(str) {
+    return str.replace(/\b\w/g, char => char.toUpperCase());
 }
 
 // Function to update CBA Chart
@@ -753,27 +830,26 @@ function displayWTP(results) {
     const wtpDetailsDiv = document.getElementById('wtpDetails');
     wtpDetailsDiv.innerHTML = `
         <ul>
-            <li>Not Lonely: \$${results.not_lonely.WTP} AUD${isSignificant('not_lonely') ? '*' : ''}</li>
-            <li>Moderately Lonely: \$${results.moderately_lonely.WTP} AUD${isSignificant('moderately_lonely') ? '*' : ''}</li>
-            <li>Severely Lonely: \$${results.severely_lonely.WTP} AUD${isSignificant('severely_lonely') ? '*' : ''}</li>
+            <li>Not Lonely: \$${results.not_lonely.WTP} AUD${categoryCoefficients.not_lonely.significance.cost_cont ? '*' : ''}</li>
+            <li>Moderately Lonely: \$${results.moderately_lonely.WTP} AUD${categoryCoefficients.moderately_lonely.significance.cost_cont ? '*' : ''}</li>
+            <li>Severely Lonely: \$${results.severely_lonely.WTP} AUD${categoryCoefficients.severely_lonely.significance.cost_cont ? '*' : ''}</li>
         </ul>
         <p>* Indicates significant estimates (p < 0.05)</p>
     `;
 }
 
-// Function to check if estimates are significant (dummy implementation)
+// Function to check if estimates are significant based on 'cost_cont' significance as a proxy
 function isSignificant(category) {
-    // In a real implementation, you would check p-values from the model
-    // Here, we'll assume all are significant for demonstration purposes
-    return true;
+    // Using 'cost_cont' significance to determine overall significance for WTP
+    return categoryCoefficients[category].significance.cost_cont;
 }
 
 // Function to initialize and update WTP Chart
 function updateWTPChart(results) {
     wtpChart.data.datasets[0].data = [
-        results.not_lonely.WTP,
-        results.moderately_lonely.WTP,
-        results.severely_lonely.WTP
+        parseFloat(results.not_lonely.WTP.replace(/,/g, '')),
+        parseFloat(results.moderately_lonely.WTP.replace(/,/g, '')),
+        parseFloat(results.severely_lonely.WTP.replace(/,/g, ''))
     ];
     wtpChart.update();
 }
@@ -791,6 +867,16 @@ function downloadWTPReport() {
     doc.text(`Severely Lonely: \$${document.getElementById('wtpDetails').children[0].children[2].innerText.split('$')[1].split(' ')[0]} AUD*`, 10, 50);
     doc.text(`* Indicates significant estimates (p < 0.05)`, 10, 60);
     
+    // Add a line break
+    doc.line(10, 65, 200, 65);
+
+    // Add WTP Chart as image
+    const wtpChartCanvas = document.getElementById('wtpChart');
+    const wtpChartURL = wtpChartCanvas.toDataURL('image/png', 1.0);
+    doc.text("WTP Chart:", 10, 75);
+    doc.addImage(wtpChartURL, 'PNG', 10, 80, 60, 60);
+
+    // Save PDF
     doc.save('WTP_Report.pdf');
 
     alert("WTP report downloaded successfully!");
