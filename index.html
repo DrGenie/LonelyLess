@@ -7,8 +7,6 @@
   <link rel="stylesheet" href="styles.css"/>
   <!-- Chart.js Library -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Chart.js Error Bars Plugin -->
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-error-bars@1.0.0/dist/chartjs-plugin-error-bars.min.js"></script>
   <!-- jsPDF Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -59,7 +57,7 @@
       local vs. wider community, weekly vs. monthly, virtual vs. hybrid, session duration, and support type.
     </p>
     <p>
-      3. Click “Calculate &amp; View Results” to open a new window with cost-benefit charts and an optional PDF export. 
+      3. Click “Calculate &amp; View Results” to perform calculations and view cost-benefit analyses.
     </p>
     <p>
       4. The <strong>WTP Results</strong> tab displays bar charts summarising the main model’s willingness to pay (A$) for each attribute.
@@ -82,18 +80,17 @@
     <p><strong>Cost per session:</strong> The out-of-pocket fee (AUD) participants must pay each time they attend.</p>
     <p><strong>Accessibility:</strong> Whether the programme is local (up to 12 km) or in a wider community (50+ km), 
       factoring in mobility, transport cost, and convenience.</p>
-    <p><strong>Frequency of Interaction:</strong> Daily (reference), weekly, or monthly, influencing how often participants engage socially.</p>
-    <p><strong>Method of Interaction:</strong> In-person, virtual, or hybrid, reflecting user preferences, technology access, and mobility considerations.</p>
-    <p><strong>Duration of Each Interaction:</strong> 30 min (reference), 2-hour, or 4-hour sessions, affecting the depth of interactions and scheduling needs.</p>
-    <p><strong>Type of Support Programme:</strong> Peer support (reference), community engagement, psychological counselling, or VR-based sessions.</p>
+    <p><strong>Frequency of Interaction:</strong> Weekly or monthly, influencing how often participants engage socially.</p>
+    <p><strong>Method of Interaction:</strong> Virtual, hybrid (in-person &amp; virtual), reflecting user preferences, technology access, and mobility considerations.</p>
+    <p><strong>Duration of Each Interaction:</strong> 2-hour or 4-hour sessions, affecting the depth of interactions and scheduling needs.</p>
+    <p><strong>Type of Support Programme:</strong> Community engagement, psychological counselling, or VR-based sessions.</p>
   </div>
 
   <!-- Inputs Tab -->
   <div id="inputsTab" class="tabcontent">
     <h2>Programme Inputs</h2>
     <p>
-      Configure your scenario. Then click “Calculate &amp; View Results” for a new cost-benefit window, 
-      or “Show Probability Plot” under the “Programme Uptake Probability” tab to see a dynamic bar chart.
+      Configure your scenario. Then click “Calculate &amp; View Results” to perform calculations and view cost-benefit analyses.
     </p>
     <form onsubmit="event.preventDefault();">
       <div class="form-grid">
@@ -134,35 +131,35 @@
         </div>
 
         <div class="form-item">
-          <label><input type="checkbox" id="localCheck" />Local Area (12 km)</label>
+          <label><input type="checkbox" id="localCheck" /> Local Area (12 km)</label>
           <br/>
-          <label><input type="checkbox" id="widerCheck" />Wider Community (50+ km)</label>
+          <label><input type="checkbox" id="widerCheck" /> Wider Community (50+ km)</label>
         </div>
 
         <div class="form-item">
-          <label><input type="checkbox" id="weeklyCheck" />Weekly</label>
+          <label><input type="checkbox" id="weeklyCheck" /> Weekly</label>
           <br/>
-          <label><input type="checkbox" id="monthlyCheck" />Monthly</label>
+          <label><input type="checkbox" id="monthlyCheck" /> Monthly</label>
         </div>
 
         <div class="form-item">
-          <label><input type="checkbox" id="virtualCheck" />Virtual Only</label>
+          <label><input type="checkbox" id="virtualCheck" /> Virtual</label>
           <br/>
-          <label><input type="checkbox" id="hybridCheck" />Hybrid (In-person &amp; Virtual)</label>
+          <label><input type="checkbox" id="hybridCheck" /> Hybrid (In-person &amp; Virtual)</label>
         </div>
 
         <div class="form-item">
-          <label><input type="checkbox" id="twoHCheck" />2-Hour Session</label>
+          <label><input type="checkbox" id="twoHCheck" /> 2-hour Interaction</label>
           <br/>
-          <label><input type="checkbox" id="fourHCheck" />4-Hour Session</label>
+          <label><input type="checkbox" id="fourHCheck" /> 4-hour Interaction</label>
         </div>
 
         <div class="form-item">
-          <label><input type="checkbox" id="commCheck" />Community Engagement</label>
+          <label><input type="checkbox" id="commCheck" /> Community Engagement</label>
           <br/>
-          <label><input type="checkbox" id="psychCheck" />Psychological Counselling</label>
+          <label><input type="checkbox" id="psychCheck" /> Psychological Counselling</label>
           <br/>
-          <label><input type="checkbox" id="vrCheck" />Virtual Reality</label>
+          <label><input type="checkbox" id="vrCheck" /> Virtual Reality</label>
         </div>
       </div>
       <div class="buttons-row">
@@ -187,52 +184,12 @@
       support scenario.
     </p>
     <div class="buttons-row">
-      <button onclick="renderWTPCharts()">Show WTP Plots</button>
+      <button onclick="renderWTPChart()">Show WTP Plots</button>
     </div>
     <div class="chart-grid">
       <div class="chart-box">
-        <h3>Community Engagement</h3>
-        <canvas id="wtpChartComm"></canvas>
-      </div>
-      <div class="chart-box">
-        <h3>Psychological Counselling</h3>
-        <canvas id="wtpChartPsych"></canvas>
-      </div>
-      <div class="chart-box">
-        <h3>Virtual Reality</h3>
-        <canvas id="wtpChartVR"></canvas>
-      </div>
-      <div class="chart-box">
-        <h3>Virtual (Method)</h3>
-        <canvas id="wtpChartVirtualMethod"></canvas>
-      </div>
-      <div class="chart-box">
-        <h3>Hybrid (Method)</h3>
-        <canvas id="wtpChartHybridMethod"></canvas>
-      </div>
-      <div class="chart-box">
-        <h3>Weekly Interaction</h3>
-        <canvas id="wtpChartWeekly"></canvas>
-      </div>
-      <div class="chart-box">
-        <h3>Monthly Interaction</h3>
-        <canvas id="wtpChartMonthly"></canvas>
-      </div>
-      <div class="chart-box">
-        <h3>2-Hour Interaction</h3>
-        <canvas id="wtpChart2Hour"></canvas>
-      </div>
-      <div class="chart-box">
-        <h3>4-Hour Interaction</h3>
-        <canvas id="wtpChart4Hour"></canvas>
-      </div>
-      <div class="chart-box">
-        <h3>Local Area Accessibility</h3>
-        <canvas id="wtpChartLocal"></canvas>
-      </div>
-      <div class="chart-box">
-        <h3>Wider Community Accessibility</h3>
-        <canvas id="wtpChartWider"></canvas>
+        <h3>WTP (A$) with Error Bars</h3>
+        <canvas id="wtpChartMain"></canvas>
       </div>
     </div>
   </div>
@@ -285,7 +242,7 @@
     <div class="buttons-row">
       <button onclick="saveScenario()">Save Current Scenario</button>
       <button onclick="openComparison()">Compare All Scenarios</button>
-      <button onclick="exportComparisonPDF()">Export Comparison to PDF</button>
+      <button onclick="exportToPDF()">Export Comparison to PDF</button>
     </div>
     <table id="scenarioTable">
       <thead>
@@ -298,7 +255,7 @@
           <th>Wider?</th>
           <th>Weekly?</th>
           <th>Monthly?</th>
-          <th>Virtual Only?</th>
+          <th>Virtual?</th>
           <th>Hybrid?</th>
           <th>2-Hour?</th>
           <th>4-Hour?</th>
