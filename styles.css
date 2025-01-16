@@ -163,3 +163,10 @@ footer {
   font-weight: bold;
   margin-right: 10px;
 }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
