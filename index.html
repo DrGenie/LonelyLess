@@ -16,7 +16,7 @@
   <div class="container">
     <header>
       <h1>LonelyLessAustralia Decision Aid Tool</h1>
-      <p>This tool helps you evaluate programme configurations for reducing loneliness. </p>
+      <p>This tool helps you evaluate programme configurations for reducing loneliness. It explains how costs and benefits are calculated so that even lay users can understand the trade‐offs.</p>
     </header>
 
     <nav class="tabs" role="tablist">
@@ -192,10 +192,12 @@
           <div class="form-item">
             <label for="state_select">
               <i class="fa-solid fa-map-marker-alt"></i> State:
-              <button class="info-button" aria-label="Choose your state to adjust for cost-of-living differences.">
-                <i class="fa-solid fa-info-circle"></i>
-              </button>
-              <span class="tooltip-text">Choose your state to adjust for cost-of-living differences.</span>
+              <span class="info-container">
+                <button class="info-button" aria-label="Choose your state to adjust for cost-of-living differences." tabindex="0">
+                  <i class="fa-solid fa-info-circle"></i>
+                </button>
+                <span class="tooltip-text">Choose your state to adjust for cost-of-living differences.</span>
+              </span>
             </label>
             <select id="state_select">
               <option value="">None</option>
@@ -210,10 +212,12 @@
             </select>
             <label for="adjustCosts">
               <i class="fa-solid fa-sync-alt"></i> Adjust for Cost of Living?
-              <button class="info-button" aria-label="Select Yes to apply cost-of-living multipliers for the chosen state.">
-                <i class="fa-solid fa-info-circle"></i>
-              </button>
-              <span class="tooltip-text">Select Yes to apply cost-of-living multipliers for the chosen state.</span>
+              <span class="info-container">
+                <button class="info-button" aria-label="Select Yes to apply cost-of-living multipliers for the chosen state." tabindex="0">
+                  <i class="fa-solid fa-info-circle"></i>
+                </button>
+                <span class="tooltip-text">Select Yes to apply cost-of-living multipliers for the chosen state.</span>
+              </span>
             </label>
             <select id="adjustCosts">
               <option value="no">No</option>
@@ -223,10 +227,12 @@
           <div class="form-item">
             <label for="costSlider">
               <i class="fa-solid fa-dollar-sign"></i> Cost per Session (AUD):
-              <button class="info-button" aria-label="Use the slider to set the base cost per session.">
-                <i class="fa-solid fa-info-circle"></i>
-              </button>
-              <span class="tooltip-text">Use the slider to set the base cost per session.</span>
+              <span class="info-container">
+                <button class="info-button" aria-label="Use the slider to set the base cost per session." tabindex="0">
+                  <i class="fa-solid fa-info-circle"></i>
+                </button>
+                <span class="tooltip-text">Use the slider to set the base cost per session.</span>
+              </span>
             </label>
             <input type="range" id="costSlider" min="0" max="100" step="1" value="50" oninput="updateCostDisplay(this.value)" />
             <span id="costLabel">50</span>
