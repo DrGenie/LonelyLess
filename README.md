@@ -2,7 +2,7 @@
 
 ## Overview
 
-The **LonelyLessAustralia Decision Aid Tool** is a web-based application designed to assist policymakers and stakeholders in evaluating different scenarios aimed at reducing loneliness among older adults in Australia. By utilizing Discrete Choice Experiment (DCE) estimates, the tool predicts programme uptake probabilities and conducts comprehensive cost-benefit analyses based on user-defined scenarios.
+The **LonelyLessAustralia Decision Aid Tool** is a web-based application designed to assist policymakers and stakeholders in evaluating different scenarios aimed at reducing loneliness among older adults in Australia. By utilising Discrete Choice Experiment (DCE) estimates, the tool predicts programme uptake probabilities and conducts comprehensive cost-benefit analyses based on user-defined scenarios.
 
 ## Features
 
@@ -15,23 +15,6 @@ The **LonelyLessAustralia Decision Aid Tool** is a web-based application designe
 4. **Costs & Benefits Analysis**: Detailed breakdown of intervention costs and monetized QALY benefits, facilitating informed decision-making.
 
 5. **Scenario Management**: Save multiple scenarios, compare them side by side, and export the comparisons to PDF for reporting and analysis.
-
-## Getting Started
-
-### Prerequisites
-
-- A modern web browser (e.g., Chrome, Firefox, Edge)
-- Internet connection to load external libraries (Chart.js, jsPDF)
-
-### Installation
-
-1. **Download the Files**: Ensure you have the following files in the same directory:
-   - `index.html`
-   - `styles.css`
-   - `script.js`
-
-2. **Open the Application**:
-   - Double-click on `index.html` to launch the tool in your default web browser.
 
 ## Usage
 
@@ -63,12 +46,6 @@ The **LonelyLessAustralia Decision Aid Tool** is a web-based application designe
    - Compare all saved scenarios by clicking **"Compare All Scenarios"**.
    - Export the comparison to a PDF by clicking **"Export Comparison to PDF"**.
 
-## Technical Details
-
-- **Chart.js**: Utilized for rendering interactive and responsive charts.
-- **jsPDF**: Enables the export of scenario comparisons to PDF format.
-- **Custom Error Bars**: Implemented within Chart.js to display standard errors for WTP values.
-
 ## Reference
 
 Engel, L., Lee, Y. Y., Le, L. K. D., Lal, A., & Mihalopoulos, C. (2021). Reducing loneliness to prevent depression in older adults in Australia: A modelled cost-effectiveness analysis. *Mental Health and Prevention, 24*. [https://doi.org/10.1016/j.mhp.2021.200212](https://doi.org/10.1016/j.mhp.2021.200212).
@@ -76,7 +53,3 @@ Engel, L., Lee, Y. Y., Le, L. K. D., Lal, A., & Mihalopoulos, C. (2021). Reducin
 ## Author
 
 Mesfin Genie, Newcastle Business School, The University of Newcastle, Australia
-
-## Acknowledgments
-
-- Thanks to the developers of [Chart.js](https://www.chartjs.org/) and [jsPDF](https://github.com/parallax/jsPDF) for their invaluable libraries.
