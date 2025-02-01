@@ -16,7 +16,7 @@
   <div class="container">
     <header>
       <h1>LonelyLessAustralia Decision Aid Tool</h1>
-      <p>This tool helps you evaluate programme configurations for reducing loneliness in Australia. </p>
+      <p>This tool helps you evaluate programme configurations for reducing loneliness. It explains how costs and benefits are calculated so that even lay users can understand the trade‐offs.</p>
     </header>
 
     <nav class="tabs" role="tablist">
@@ -58,7 +58,7 @@
           <li><strong>Inputs</strong> – Configure your scenario parameters using user-friendly level cards.</li>
           <li><strong>WTP Results</strong> – View charts showing willingness-to-pay estimates.</li>
           <li><strong>Predicted Programme Uptake</strong> – See the predicted uptake percentage and suggestions for improvements.</li>
-          <li><strong>Costs &amp; Benefits</strong> – Analyse detailed cost components and QALY-based benefits, with interactive sliders, pop-up info boxes and educational summaries.</li>
+          <li><strong>Costs &amp; Benefits</strong> – Analyse detailed cost components and QALY-based benefits with interactive sliders, pop-up info boxes and educational summaries.</li>
           <li><strong>Scenarios</strong> – Save, compare and export various configurations.</li>
         </ul>
       </div>
@@ -84,7 +84,7 @@
     <section id="attributesTab" class="tabcontent" tabindex="0">
       <h2>Key Attributes</h2>
       <div class="attributes-list">
-        <!-- (Attribute cards as before; unchanged) -->
+        <!-- Attribute Card 1: Cost per Session -->
         <div class="attribute-card" tabindex="0">
           <div class="attribute-icon">
             <svg width="24" height="24" fill="#2980b9" xmlns="http://www.w3.org/2000/svg">
@@ -100,7 +100,86 @@
             <p>The out-of-pocket fee (AUD) participants must pay each time they attend.</p>
           </div>
         </div>
-        <!-- Additional attribute cards omitted for brevity -->
+        <!-- Attribute Card 2: Accessibility -->
+        <div class="attribute-card" tabindex="0">
+          <div class="attribute-icon">
+            <svg width="24" height="24" fill="#e67e22" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="#e67e22" stroke-width="2" fill="none"/>
+              <path d="M12 4a8 8 0 0 1 0 16 8 8 0 0 1 0-16z" fill="#e67e22"/>
+            </svg>
+            <div class="tooltip" role="tooltip">
+              Determines if the programme is offered locally (up to 12 km) or in a wider community (50+ km), affecting mobility, transport costs, and convenience.
+            </div>
+          </div>
+          <div class="attribute-content">
+            <h4>Accessibility</h4>
+            <p>Whether the programme is local or in a wider community.</p>
+          </div>
+        </div>
+        <!-- Attribute Card 3: Frequency of Interaction -->
+        <div class="attribute-card" tabindex="0">
+          <div class="attribute-icon">
+            <svg width="24" height="24" fill="#27ae60" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="#27ae60" stroke-width="2" fill="none"/>
+              <path d="M12 6v6l4 2" stroke="#27ae60" stroke-width="2" fill="none"/>
+            </svg>
+            <div class="tooltip" role="tooltip">
+              Weekly sessions promote more frequent social engagement compared to monthly sessions.
+            </div>
+          </div>
+          <div class="attribute-content">
+            <h4>Frequency of Interaction</h4>
+            <p>Weekly or monthly sessions.</p>
+          </div>
+        </div>
+        <!-- Attribute Card 4: Method of Interaction -->
+        <div class="attribute-card" tabindex="0">
+          <div class="attribute-icon">
+            <svg width="24" height="24" fill="#8e44ad" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="#8e44ad" stroke-width="2" fill="none"/>
+              <path d="M8 12h8M12 8v8" stroke="#8e44ad" stroke-width="2" fill="none"/>
+            </svg>
+            <div class="tooltip" role="tooltip">
+              Virtual sessions are delivered online; hybrid sessions combine in-person and virtual elements.
+            </div>
+          </div>
+          <div class="attribute-content">
+            <h4>Method of Interaction</h4>
+            <p>Virtual or hybrid (in-person &amp; virtual).</p>
+          </div>
+        </div>
+        <!-- Attribute Card 5: Duration of Each Interaction -->
+        <div class="attribute-card" tabindex="0">
+          <div class="attribute-icon">
+            <svg width="24" height="24" fill="#3498db" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="#3498db" stroke-width="2" fill="none"/>
+              <path d="M12 6v6l4 2" stroke="#3498db" stroke-width="2" fill="none"/>
+            </svg>
+            <div class="tooltip" role="tooltip">
+              2-hour or 4-hour sessions affect both the depth of interaction and scheduling flexibility.
+            </div>
+          </div>
+          <div class="attribute-content">
+            <h4>Duration of Each Interaction</h4>
+            <p>2-hour or 4-hour sessions.</p>
+          </div>
+        </div>
+        <!-- Attribute Card 6: Type of Support Programme -->
+        <div class="attribute-card" tabindex="0">
+          <div class="attribute-icon">
+            <svg width="24" height="24" fill="#e74c3c" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="#e74c3c" stroke-width="2" fill="none"/>
+              <path d="M8 12l2-2 4 4 6-6" stroke="#e74c3c" stroke-width="2" fill="none"/>
+            </svg>
+            <div class="tooltip" role="tooltip">
+              Options include community engagement, psychological counselling, or VR-based sessions.
+            </div>
+          </div>
+          <div class="attribute-content">
+            <h4>Type of Support Programme</h4>
+            <p>Community engagement, psychological counselling, or VR-based sessions.</p>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -284,7 +363,6 @@
           <button class="buttons-row" onclick="toggleBenefitsAnalysis()">Benefits Analysis</button>
         </div>
         <div id="detailedCostBreakdown" class="cost-cards" style="display:none;">
-          <!-- All cost components as cards -->
           <div class="cost-card">
             <h4><i class="fa-solid fa-newspaper"></i> Advertisements in Local Press</h4>
             <p><strong>Value:</strong> A$2978.80</p>
