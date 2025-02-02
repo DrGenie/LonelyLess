@@ -1,4 +1,4 @@
-/* RESET & BASsE */
+/* RESET & BASE */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -15,7 +15,7 @@ body {
   margin: 20px auto;
   background-color: #fff;
   border-radius: 10px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.1);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
   padding: 20px 30px;
 }
 
