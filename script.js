@@ -1,12 +1,12 @@
 /****************************************************************************
  * SCRIPT.JS
- * Enhanced tabs with working event listeners, improved Inputs layout,
+ * Enhanced tabs with event listeners, improved Inputs layout,
  * interactive Cost-Benefits summary and chart, dynamic doughnut chart for
  * predicted uptake with multi-feature recommendations, and export to PDF.
  ****************************************************************************/
 
-/** Attach event listeners on DOMContentLoaded */
 document.addEventListener("DOMContentLoaded", function() {
+  // Attach click event listeners to tab buttons
   const tabButtons = document.querySelectorAll(".tablink");
   tabButtons.forEach(button => {
     button.addEventListener("click", function() {
@@ -14,15 +14,15 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   });
   // Set default tab
-  openTab("introTab", tabButtons[0]);
+  openTab("introTab", document.querySelector(".tablink"));
 });
 
 /** Tab Switching Function */
 function openTab(tabId, btn) {
-  const tabs = document.getElementsByClassName("tabcontent");
-  Array.from(tabs).forEach(tab => tab.style.display = "none");
-  const tabButtons = document.getElementsByClassName("tablink");
-  Array.from(tabButtons).forEach(button => {
+  const tabs = document.querySelectorAll(".tabcontent");
+  tabs.forEach(tab => tab.style.display = "none");
+  const tabButtons = document.querySelectorAll(".tablink");
+  tabButtons.forEach(button => {
     button.classList.remove("active");
     button.setAttribute("aria-selected", "false");
   });
@@ -30,7 +30,6 @@ function openTab(tabId, btn) {
   btn.classList.add("active");
   btn.setAttribute("aria-selected", "true");
 
-  // Render charts if needed
   if (tabId === 'wtpTab') renderWTPChart();
   if (tabId === 'costsTab') renderCostsBenefits();
 }
@@ -103,7 +102,7 @@ function buildScenarioFromInputs() {
   const duration = document.querySelector('input[name="duration"]:checked');
   const accessibility = document.querySelector('input[name="accessibility"]:checked');
   
-  // Method is optional; if not selected, assume in-person (both false)
+  // Method is optional; if not selected, assume in-person (i.e. virtualCheck and hybridCheck false)
   const method = document.querySelector('input[name="method"]:checked');
   let virtualCheck = false, hybridCheck = false;
   if (method) {
@@ -116,7 +115,6 @@ function buildScenarioFromInputs() {
     return null;
   }
   
-  // Boolean flags for support type
   const commCheck = support.value === "community";
   const psychCheck = support.value === "counselling";
   const vrCheck = support.value === "vr";
@@ -130,7 +128,6 @@ function buildScenarioFromInputs() {
   const localCheck = accessibility.value === "local";
   const widerCheck = accessibility.value === "wider";
   
-  // Compute uptake and net benefit
   const uptake = computeProbability({ state, adjustCosts, cost_val, localCheck, widerCheck, weeklyCheck, monthlyCheck, virtualCheck, hybridCheck, twoHCheck, fourHCheck, commCheck, psychCheck, vrCheck }, mainCoefficients) * 100;
   const baseParticipants = 250;
   const numberOfParticipants = baseParticipants * computeProbability({ state, adjustCosts, cost_val, localCheck, widerCheck, weeklyCheck, monthlyCheck, virtualCheck, hybridCheck, twoHCheck, fourHCheck, commCheck, psychCheck, vrCheck }, mainCoefficients);
@@ -405,7 +402,6 @@ function drawUptakeChart(uptakeVal) {
 function getRecommendation(scenario, uptake) {
   let rec = "Recommendation: ";
   
-  // Method: if none selected, assume in-person.
   if (!scenario.virtualCheck && !scenario.hybridCheck) {
     rec += "Delivery defaults to in-person. ";
   } else {
@@ -417,7 +413,6 @@ function getRecommendation(scenario, uptake) {
     }
   }
   
-  // Support type
   if (scenario.commCheck && uptake < 40) {
     rec += "Enhance promotion of community engagement. ";
   }
@@ -428,7 +423,6 @@ function getRecommendation(scenario, uptake) {
     rec += "Consider supplementing VR sessions with traditional support. ";
   }
   
-  // Frequency and Duration
   if (scenario.monthlyCheck && uptake < 50) {
     rec += "Increase session frequency from monthly to weekly. ";
   }
@@ -439,7 +433,6 @@ function getRecommendation(scenario, uptake) {
     rec += "Longer interactions are effective. ";
   }
   
-  // Accessibility
   if (scenario.widerCheck && uptake < 50) {
     rec += "Offering the programme locally could boost uptake. ";
   }
@@ -552,171 +545,4 @@ function renderCostsBenefits() {
       }
     }
   });
-}
-
-/***************************************************************************
- * Integration: Calculate & View Results
- ***************************************************************************/
-function openSingleScenario() {
-  renderProbChart();
-  renderCostsBenefits();
-}
-
-/***************************************************************************
- * Render Predicted Programme Uptake Chart (Doughnut) with Dynamic Recommendations
- ***************************************************************************/
-let uptakeChart = null;
-function renderProbChart() {
-  const scenario = buildScenarioFromInputs();
-  if (!scenario) return;
-  const pVal = computeProbability(scenario, mainCoefficients) * 100;
-  drawUptakeChart(pVal);
-  const recommendation = getRecommendation(scenario, pVal);
-  alert(`Predicted uptake: ${pVal.toFixed(1)}%.\n${recommendation}`);
-}
-
-/** Draw Uptake Chart (Doughnut) */
-function drawUptakeChart(uptakeVal) {
-  const ctx = document.getElementById("uptakeChart").getContext("2d");
-  if (uptakeChart) uptakeChart.destroy();
-  uptakeChart = new Chart(ctx, {
-    type: "doughnut",
-    data: {
-      labels: ["Uptake", "Remaining"],
-      datasets: [{
-        data: [uptakeVal, 100 - uptakeVal],
-        backgroundColor: ["#28a745", "#dc3545"]
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        title: {
-          display: true,
-          text: `Predicted Programme Uptake: ${uptakeVal.toFixed(1)}%`,
-          font: { size: 16 }
-        },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              return `${context.label}: ${context.parsed.toFixed(1)}%`;
-            }
-          }
-        }
-      }
-    }
-  });
-}
-
-/***************************************************************************
- * Dynamic Recommendation for Predicted Programme Uptake
- ***************************************************************************/
-function getRecommendation(scenario, uptake) {
-  let rec = "Recommendation: ";
-  
-  // Method: if none selected, assume in-person.
-  if (!scenario.virtualCheck && !scenario.hybridCheck) {
-    rec += "Delivery defaults to in-person. ";
-  } else {
-    if (scenario.virtualCheck && uptake < 50) {
-      rec += "Fully virtual delivery may lower uptake; consider a hybrid or in-person approach. ";
-    }
-    if (scenario.hybridCheck && uptake < 50) {
-      rec += "Hybrid delivery may benefit from more in-person elements. ";
-    }
-  }
-  
-  // Support Type
-  if (scenario.commCheck && uptake < 40) {
-    rec += "Enhance promotion of community engagement. ";
-  }
-  if (scenario.psychCheck && uptake < 40) {
-    rec += "Integrate community support with counselling. ";
-  }
-  if (scenario.vrCheck && uptake < 40) {
-    rec += "Consider supplementing VR sessions with traditional support. ";
-  }
-  
-  // Frequency and Duration
-  if (scenario.monthlyCheck && uptake < 50) {
-    rec += "Increase session frequency from monthly to weekly. ";
-  }
-  if (scenario.twoHCheck && uptake < 50) {
-    rec += "Shorter interactions might attract more participants. ";
-  }
-  if (scenario.fourHCheck && uptake >= 70) {
-    rec += "Longer interactions are effective. ";
-  }
-  
-  // Accessibility
-  if (scenario.widerCheck && uptake < 50) {
-    rec += "Offering the programme locally could boost uptake. ";
-  }
-  
-  if (uptake >= 70) {
-    rec = "Uptake is high. The current configuration is effective.";
-  }
-  
-  return rec;
-}
-
-/***************************************************************************
- * Export to PDF Functionality using jsPDF
- ***************************************************************************/
-function exportToPDF() {
-  if (savedScenarios.length === 0) {
-    alert("No scenarios saved to export.");
-    return;
-  }
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  const pageWidth = doc.internal.pageSize.getWidth();
-  let currentY = 15;
-  doc.setFontSize(16);
-  doc.text("LonelyLessAustralia - Scenarios Comparison", pageWidth / 2, currentY, { align: 'center' });
-  currentY += 10;
-  savedScenarios.forEach((scenario, index) => {
-    if (currentY > 260) {
-      doc.addPage();
-      currentY = 15;
-    }
-    doc.setFontSize(14);
-    doc.text(`Scenario ${index + 1}: ${scenario.name}`, 15, currentY);
-    currentY += 7;
-    doc.setFontSize(12);
-    doc.text(`State: ${scenario.state || 'None'}`, 15, currentY);
-    currentY += 5;
-    doc.text(`Cost Adjust: ${scenario.adjustCosts === 'yes' ? 'Yes' : 'No'}`, 15, currentY);
-    currentY += 5;
-    doc.text(`Cost per Session: A$${scenario.cost_val.toFixed(2)}`, 15, currentY);
-    currentY += 5;
-    doc.text(`Local: ${scenario.localCheck ? 'Yes' : 'No'}`, 15, currentY);
-    currentY += 5;
-    doc.text(`Wider: ${scenario.widerCheck ? 'Yes' : 'No'}`, 15, currentY);
-    currentY += 5;
-    doc.text(`Weekly: ${scenario.weeklyCheck ? 'Yes' : 'No'}`, 15, currentY);
-    currentY += 5;
-    doc.text(`Monthly: ${scenario.monthlyCheck ? 'Yes' : 'No'}`, 15, currentY);
-    currentY += 5;
-    doc.text(`Virtual: ${scenario.virtualCheck ? 'Yes' : 'No'}`, 15, currentY);
-    currentY += 5;
-    doc.text(`Hybrid: ${scenario.hybridCheck ? 'Yes' : 'No'}`, 15, currentY);
-    currentY += 5;
-    doc.text(`2-Hour: ${scenario.twoHCheck ? 'Yes' : 'No'}`, 15, currentY);
-    currentY += 5;
-    doc.text(`4-Hour: ${scenario.fourHCheck ? 'Yes' : 'No'}`, 15, currentY);
-    currentY += 5;
-    doc.text(`Community: ${scenario.commCheck ? 'Yes' : 'No'}`, 15, currentY);
-    currentY += 5;
-    doc.text(`Counselling: ${scenario.psychCheck ? 'Yes' : 'No'}`, 15, currentY);
-    currentY += 5;
-    doc.text(`VR: ${scenario.vrCheck ? 'Yes' : 'No'}`, 15, currentY);
-    currentY += 5;
-    doc.text(`Predicted Uptake: ${scenario.predictedUptake}%`, 15, currentY);
-    currentY += 5;
-    doc.text(`Net Benefit: A$${scenario.netBenefit}`, 15, currentY);
-    currentY += 10;
-  });
-  doc.save("Scenarios_Comparison.pdf");
 }
