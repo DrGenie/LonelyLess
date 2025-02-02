@@ -92,26 +92,24 @@ function buildScenarioFromInputs() {
   const adjustCosts = document.getElementById("adjustCosts").value;
   const cost_val = parseInt(document.getElementById("costSlider").value, 10);
   
-  // Get radio selections from input-level cards
+  // Get required radio selections from input-level cards
   const support = document.querySelector('input[name="support"]:checked');
-  // For method, if none selected, default to in-person (i.e. virtualCheck and hybridCheck false)
-  const method = document.querySelector('input[name="method"]:checked');
   const frequency = document.querySelector('input[name="frequency"]:checked');
   const duration = document.querySelector('input[name="duration"]:checked');
   const accessibility = document.querySelector('input[name="accessibility"]:checked');
-
-  // For support, frequency, duration, and accessibility selection is required.
-  if (!support || !frequency || !duration || !accessibility) {
-    alert("Please select a level for all required input cards.");
-    return null;
-  }
   
-  // For method, if not selected, default to in-person (i.e. neither virtual nor hybrid)
-  let virtualCheck = false;
-  let hybridCheck = false;
+  // Method is optional; if not selected, assume in-person (i.e. both virtual and hybrid false)
+  const method = document.querySelector('input[name="method"]:checked');
+  let virtualCheck = false, hybridCheck = false;
   if (method) {
     virtualCheck = method.value === "virtual";
     hybridCheck = method.value === "hybrid";
+  }
+  
+  // Required fields: support, frequency, duration, accessibility
+  if (!support || !frequency || !duration || !accessibility) {
+    alert("Please select a level for all required input cards (Support, Frequency, Duration, Accessibility).");
+    return null;
   }
   
   // Determine boolean flags for support type
@@ -351,53 +349,80 @@ function openComparison() {
 }
 
 /***************************************************************************
+ * Draw Uptake Chart (Doughnut)
+ ***************************************************************************/
+let uptakeChart = null;
+function drawUptakeChart(uptakeVal) {
+  const ctx = document.getElementById("uptakeChart").getContext("2d");
+  if (uptakeChart) uptakeChart.destroy();
+  uptakeChart = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: ["Uptake", "Remaining"],
+      datasets: [{
+        data: [uptakeVal, 100 - uptakeVal],
+        backgroundColor: ["#28a745", "#dc3545"]
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        title: {
+          display: true,
+          text: `Predicted Programme Uptake: ${uptakeVal.toFixed(1)}%`,
+          font: { size: 16 }
+        }
+      }
+    }
+  });
+}
+
+/***************************************************************************
  * Dynamic Recommendation for Predicted Programme Uptake
  ***************************************************************************/
 function getRecommendation(scenario, uptake) {
   let rec = "Recommendation: ";
   
-  // Consider method: if no method selected, assume in-person.
-  if (!scenario.virtualCheck && !scenario.hybridCheck) {
-    rec += "Method defaults to In-person. ";
-  } else {
-    if (scenario.virtualCheck && uptake < 50) {
-      rec += "Fully virtual delivery appears to lower uptake. Consider switching to a hybrid approach. ";
-    }
-    if (scenario.hybridCheck && uptake < 50) {
-      rec += "Hybrid method may need improvement – consider emphasizing in-person elements. ";
-    }
+  // Consider method – if virtual selected and uptake is low, suggest hybrid/in-person
+  if (scenario.virtualCheck && uptake < 50) {
+    rec += "Virtual delivery seems to lower uptake. Consider switching to a hybrid or in-person method. ";
+  } else if (scenario.hybridCheck && uptake < 50) {
+    rec += "Hybrid delivery may be improved by increasing in-person elements. ";
+  } else if (!scenario.virtualCheck && !scenario.hybridCheck) {
+    rec += "Method defaults to in-person. ";
   }
   
   // Consider support type
   if (scenario.commCheck && uptake < 40) {
-    rec += "Community engagement may need further promotion. ";
+    rec += "Community engagement might need more promotion. ";
   }
   if (scenario.psychCheck && uptake < 40) {
-    rec += "Counselling might be less appealing; consider bolstering community support. ";
+    rec += "Counselling alone might be less attractive; consider integrating community support. ";
   }
   if (scenario.vrCheck && uptake < 40) {
-    rec += "VR-based sessions might not be optimal for uptake; consider alternative support models. ";
+    rec += "VR-based sessions may be less effective for uptake; consider alternative models. ";
   }
   
-  // Consider frequency and duration
-  if (scenario.weeklyCheck === false && scenario.monthlyCheck && uptake < 50) {
-    rec += "Increasing session frequency (e.g. from monthly to weekly) may boost uptake. ";
+  // Frequency and Duration adjustments
+  if (scenario.monthlyCheck && uptake < 50) {
+    rec += "Increasing session frequency (e.g. from monthly to weekly) could improve uptake. ";
   }
   if (scenario.twoHCheck && uptake < 50) {
-    rec += "Longer interactions might deter participation; consider a shorter duration. ";
+    rec += "Shorter interactions might be more appealing. ";
   }
   if (scenario.fourHCheck && uptake >= 70) {
-    rec += "Longer interactions seem effective; continue with current duration. ";
+    rec += "Longer interactions appear effective. ";
   }
   
-  // Consider accessibility – if wider community is selected and uptake is low, suggest local service
+  // Accessibility: if wider community is selected and uptake is low, suggest local delivery
   if (scenario.widerCheck && uptake < 50) {
-    rec += "Offering the programme locally may improve uptake. ";
+    rec += "Consider offering the programme locally. ";
   }
   
-  // If uptake is high, praise configuration
+  // If uptake is high, praise the configuration
   if (uptake >= 70) {
-    rec = "Uptake is high. The current configuration appears effective. ";
+    rec = "Uptake is high. The current configuration appears effective.";
   }
   
   return rec;
@@ -406,47 +431,228 @@ function getRecommendation(scenario, uptake) {
 /***************************************************************************
  * Render Predicted Programme Uptake Chart with Dynamic Recommendations
  ***************************************************************************/
-let probChartInstance = null;
 function renderProbChart() {
   const scenario = buildScenarioFromInputs();
   if (!scenario) return;
   const pVal = computeProbability(scenario, mainCoefficients) * 100;
-  const ctx = document.getElementById("probChartMain").getContext("2d");
-  if (probChartInstance) probChartInstance.destroy();
+  drawUptakeChart(pVal);
+  const recommendation = getRecommendation(scenario, pVal);
+  alert(`Predicted uptake: ${pVal.toFixed(1)}%.\n${recommendation}`);
+}
+
+/***************************************************************************
+ * Render Costs & Benefits Analysis (Combined Bar Chart)
+ ***************************************************************************/
+let combinedChartInstance = null;
+const QALY_SCENARIO_VALUES = { low: 0.02, moderate: 0.05, high: 0.1 };
+const VALUE_PER_QALY = 50000;
+// Cost components as provided:
+const FIXED_COSTS = { advertisement: 2978.80 };
+const VARIABLE_COSTS = { 
+  printing: 0.12 * 10000, 
+  postage: 0.15 * 10000, 
+  admin: 49.99 * 10, 
+  trainer: 223.86 * 100, 
+  oncosts: 44.77 * 100, 
+  facilitator: 100.00 * 100, 
+  materials: 50.00 * 100, 
+  venue: 15.00 * 100, 
+  sessionTime: 20.00 * 250, 
+  travel: 10.00 * 250 
+};
+const FIXED_TOTAL = FIXED_COSTS.advertisement + 26863.00;
+const VARIABLE_TOTAL = VARIABLE_COSTS.printing + VARIABLE_COSTS.postage + VARIABLE_COSTS.admin + VARIABLE_COSTS.trainer +
+                         VARIABLE_COSTS.oncosts + VARIABLE_COSTS.facilitator + VARIABLE_COSTS.materials +
+                         VARIABLE_COSTS.venue + VARIABLE_COSTS.sessionTime + VARIABLE_COSTS.travel;
+
+function renderCostsBenefits() {
+  const scenario = buildScenarioFromInputs();
+  if (!scenario) return;
+  const pVal = computeProbability(scenario, mainCoefficients);
+  const uptakePercentage = pVal * 100;
+  const baseParticipants = 250;
+  const numberOfParticipants = baseParticipants * pVal;
+  const qalyScenario = document.getElementById("qalySelect").value;
+  const qalyPerParticipant = QALY_SCENARIO_VALUES[qalyScenario];
+  const totalQALY = numberOfParticipants * qalyPerParticipant;
+  const monetizedBenefits = totalQALY * VALUE_PER_QALY;
+  const totalInterventionCost = FIXED_TOTAL + (VARIABLE_TOTAL * pVal);
+  const costPerPerson = totalInterventionCost / numberOfParticipants;
+  const netBenefit = monetizedBenefits - totalInterventionCost;
   
-  // Create a horizontal bar chart with data labels using Chart.js plugin "datalabels" (if desired)
-  probChartInstance = new Chart(ctx, {
+  // Update scenario values for saving
+  scenario.predictedUptake = uptakePercentage.toFixed(2);
+  scenario.netBenefit = netBenefit.toFixed(2);
+  
+  const costsTab = document.getElementById("costsBenefitsResults");
+  costsTab.innerHTML = "";
+  
+  // Render summary information with educational explanation
+  const summaryDiv = document.createElement("div");
+  summaryDiv.className = "calculation-info";
+  summaryDiv.innerHTML = `
+    <h4>Cost &amp; Benefits Analysis</h4>
+    <p><strong>Uptake:</strong> ${uptakePercentage.toFixed(2)}%</p>
+    <p><strong>Participants:</strong> ${numberOfParticipants.toFixed(0)}</p>
+    <p><strong>Total Intervention Cost:</strong> A$${totalInterventionCost.toFixed(2)}</p>
+    <p><strong>Cost per Participant:</strong> A$${costPerPerson.toFixed(2)}</p>
+    <p><strong>Total QALYs:</strong> ${totalQALY.toFixed(2)}</p>
+    <p><strong>Monetised Benefits:</strong> A$${monetizedBenefits.toLocaleString()}</p>
+    <p><strong>Net Benefit:</strong> A$${netBenefit.toLocaleString()}</p>
+    <p>This analysis combines fixed costs (advertisements in local press and training) and variable costs (printing, postage, administrative personnel, trainer cost, on‑costs, facilitator salaries, material costs, venue hire, session time and travel). Benefits are calculated based on QALY gains multiplied by A$50,000.</p>
+  `;
+  costsTab.appendChild(summaryDiv);
+  
+  // Render combined cost-benefit bar chart
+  const combinedChartContainer = document.createElement("div");
+  combinedChartContainer.id = "combinedChartContainer";
+  combinedChartContainer.innerHTML = `<canvas id="combinedChart"></canvas>`;
+  costsTab.appendChild(combinedChartContainer);
+  
+  const ctxCombined = document.getElementById("combinedChart").getContext("2d");
+  if (combinedChartInstance) combinedChartInstance.destroy();
+  combinedChartInstance = new Chart(ctxCombined, {
     type: 'bar',
     data: {
-      labels: ["Predicted Uptake (%)"],
+      labels: ["Total Cost", "Monetised Benefits", "Net Benefit"],
       datasets: [{
-        label: 'Uptake (%)',
-        data: [pVal],
-        backgroundColor: pVal < 30 ? 'rgba(220,53,69,0.6)' : pVal < 70 ? 'rgba(255,193,7,0.6)' : 'rgba(40,167,69,0.6)',
-        borderColor: pVal < 30 ? 'rgba(220,53,69,1)' : pVal < 70 ? 'rgba(255,193,7,1)' : 'rgba(40,167,69,1)',
+        label: "A$",
+        data: [totalInterventionCost, monetizedBenefits, netBenefit],
+        backgroundColor: [
+          'rgba(220,53,69,0.6)',
+          'rgba(40,167,69,0.6)',
+          'rgba(255,193,7,0.6)'
+        ],
+        borderColor: [
+          'rgba(220,53,69,1)',
+          'rgba(40,167,69,1)',
+          'rgba(255,193,7,1)'
+        ],
         borderWidth: 1
       }]
     },
     options: {
       responsive: true,
-      indexAxis: 'y',
-      scales: { x: { beginAtZero: true, max: 100 } },
       plugins: {
         legend: { display: false },
-        title: { display: true, text: `Predicted Programme Uptake: ${pVal.toFixed(2)}%`, font: { size: 16 } },
+        title: { display: true, text: "Combined Cost-Benefit Analysis", font: { size: 16 } }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          suggestedMax: Math.max(totalInterventionCost, monetizedBenefits, Math.abs(netBenefit)) * 1.2
+        }
+      }
+    }
+  });
+}
+
+/***************************************************************************
+ * Integration: Calculate & View Results
+ ***************************************************************************/
+function openSingleScenario() {
+  // When clicking calculate, immediately update the results.
+  renderProbChart();
+  renderCostsBenefits();
+}
+
+/***************************************************************************
+ * Render Predicted Programme Uptake Chart (Doughnut) with Dynamic Recommendations
+ ***************************************************************************/
+let uptakeChart = null;
+function renderProbChart() {
+  const scenario = buildScenarioFromInputs();
+  if (!scenario) return;
+  const pVal = computeProbability(scenario, mainCoefficients) * 100;
+  drawUptakeChart(pVal);
+  const recommendation = getRecommendation(scenario, pVal);
+  alert(`Predicted uptake: ${pVal.toFixed(1)}%.\n${recommendation}`);
+}
+
+/** Draw Uptake Chart (Doughnut) */
+function drawUptakeChart(uptakeVal) {
+  const ctx = document.getElementById("uptakeChart").getContext("2d");
+  if (uptakeChart) uptakeChart.destroy();
+  uptakeChart = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: ["Uptake", "Remaining"],
+      datasets: [{
+        data: [uptakeVal, 100 - uptakeVal],
+        backgroundColor: ["#28a745", "#dc3545"]
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        title: {
+          display: true,
+          text: `Predicted Programme Uptake: ${uptakeVal.toFixed(1)}%`,
+          font: { size: 16 }
+        },
         tooltip: {
           callbacks: {
             label: function(context) {
-              return `${context.parsed.x.toFixed(2)}%`;
+              return `${context.label}: ${context.parsed.toFixed(1)}%`;
             }
           }
         }
       }
     }
   });
+}
+
+/***************************************************************************
+ * Dynamic Recommendation for Predicted Programme Uptake
+ ***************************************************************************/
+function getRecommendation(scenario, uptake) {
+  let rec = "Recommendation: ";
   
-  const recommendation = getRecommendation(scenario, pVal);
-  alert(`Predicted uptake: ${pVal.toFixed(2)}%.\n${recommendation}`);
+  // Method (if none selected, assume in-person)
+  if (!scenario.virtualCheck && !scenario.hybridCheck) {
+    rec += "Method defaults to in-person. ";
+  } else {
+    if (scenario.virtualCheck && uptake < 50) {
+      rec += "Fully virtual delivery may lower uptake; consider a hybrid approach. ";
+    }
+    if (scenario.hybridCheck && uptake < 50) {
+      rec += "Hybrid delivery could benefit from more in-person elements. ";
+    }
+  }
+  
+  // Support Type
+  if (scenario.commCheck && uptake < 40) {
+    rec += "Increase emphasis on community engagement. ";
+  }
+  if (scenario.psychCheck && uptake < 40) {
+    rec += "Integrate community support to boost counselling appeal. ";
+  }
+  if (scenario.vrCheck && uptake < 40) {
+    rec += "VR-based sessions may need to be complemented with traditional support. ";
+  }
+  
+  // Frequency and Duration
+  if (scenario.monthlyCheck && uptake < 50) {
+    rec += "Consider increasing session frequency to weekly. ";
+  }
+  if (scenario.twoHCheck && uptake < 50) {
+    rec += "Shorter interactions might encourage participation. ";
+  }
+  if (scenario.fourHCheck && uptake >= 70) {
+    rec += "Longer interactions appear effective. ";
+  }
+  
+  // Accessibility
+  if (scenario.widerCheck && uptake < 50) {
+    rec += "Offering the programme locally may improve uptake. ";
+  }
+  
+  if (uptake >= 70) {
+    rec = "Uptake is high. The current configuration is effective.";
+  }
+  
+  return rec;
 }
 
 /***************************************************************************
