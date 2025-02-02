@@ -1,4 +1,4 @@
-/* RESET & BASEs */
+/* RESET & BASE */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -320,25 +320,6 @@ canvas {
   color: #7f8c8d;
   font-size: 0.95em;
   margin: 0;
-}
-
-/* FILTER OPTIONS (Scenarios Tab) */
-.filter-options {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 15px;
-  flex-wrap: wrap;
-}
-.filter-options label {
-  font-weight: 600;
-  color: #2c3e50;
-}
-.filter-options select {
-  padding: 6px;
-  border: 1px solid #bdc3c7;
-  border-radius: 4px;
-  font-size: 1em;
 }
 
 /* SCENARIOS TABLE */
