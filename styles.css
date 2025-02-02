@@ -281,6 +281,7 @@ canvas {
   background: #fafafa;
   border: 1px solid #ccc;
   border-radius: 6px;
+  position: relative;
 }
 .chart-box h3 {
   text-align: center;
