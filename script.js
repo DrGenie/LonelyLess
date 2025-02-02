@@ -1,7 +1,7 @@
 /****************************************************************************
  * SCRIPT.JS
  * Enhanced tabs with event listenerss, improved Inputs layout,
- * interactive Cost-Benefits summary and chart, dynamic doughnut chart for
+ * interactive Cost-Benefits summaryy and chart, dynamic doughnut chart for
  * predicted uptake with multi-feature recommendations, and export to PDF.
  ****************************************************************************/
 
