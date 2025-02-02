@@ -1,6 +1,6 @@
 /****************************************************************************
  * SCRIPT.JS
- * Enhanced tabs with event listenerss, improved Inputs layout,
+ * Enhanced tabs with event listenerrss, improved Inputs layout,
  * interactive Cost-Benefits summaryy and chart, dynamic doughnut chart for
  * predicted uptake with multi-feature recommendations, and export to PDF.
  ****************************************************************************/
