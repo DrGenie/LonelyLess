@@ -16,7 +16,7 @@
   <div class="container">
     <header>
       <h1>LonelyLessAustralia Decision Aid Tool</h1>
-      <p>This tool helps you evaluate programme configurations for reducing loneliness among older adults in Australia. It explains how costs and benefits are calculated so that users can understand the trade‐offs.</p>
+      <p>This tool helps you evaluate programme configurations for reducing loneliness. It explains how costs and benefits are calculated so that even lay users can understand the trade‐offs.</p>
     </header>
 
     <nav class="tabs" role="tablist">
@@ -54,12 +54,12 @@
         </p>
         <ul>
           <li><strong>Instructions</strong> – Step-by-step guidance.</li>
-          <li><strong>Attributes</strong> – Detailed explanation of programme features (hover over info icons for extra details).</li>
-          <li><strong>Inputs</strong> – Configure your scenario parameters using user-friendly level cards.</li>
+          <li><strong>Attributes</strong> – Detailed explanation of programme features (hover over info icons for extra details, including the reference level).</li>
+          <li><strong>Inputs</strong> – Configure your scenario parameters using visually appealing level cards.</li>
           <li><strong>WTP Results</strong> – View charts showing willingness-to-pay estimates.</li>
-          <li><strong>Predicted Programme Uptake</strong> – See the predicted uptake percentage along with dynamic recommendations.</li>
-          <li><strong>Costs &amp; Benefits</strong> – Analyse detailed cost components and QALY-based benefits with interactive sliders, pop-up info boxes and educational summaries.</li>
-          <li><strong>Scenarios</strong> – Save, compare and export various configurations.</li>
+          <li><strong>Predicted Programme Uptake</strong> – See the predicted uptake percentage and dynamic recommendations.</li>
+          <li><strong>Costs &amp; Benefits</strong> – Analyse cost components and QALY-based benefits with interactive sliders, pop-up info boxes, and educational summaries.</li>
+          <li><strong>Scenarios</strong> – Save, compare, and export various configurations.</li>
         </ul>
       </div>
     </section>
@@ -69,12 +69,12 @@
       <div class="calculation-info">
         <h4>How to Use This Tool</h4>
         <ol>
-          <li style="margin-left: 20px;">Review the <strong>Attributes</strong> tab to understand each programme feature. Hover over the info icons to view extra details.</li>
-          <li style="margin-left: 20px;">Configure your scenario in the <strong>Inputs</strong> tab using the level cards (hover over the info buttons for instructions).</li>
+          <li style="margin-left: 20px;">Review the <strong>Attributes</strong> tab to understand each programme feature. Hover over the info icons to view extra details and the reference level.</li>
+          <li style="margin-left: 20px;">Configure your scenario in the <strong>Inputs</strong> tab using the level cards (hover over the info buttons for guidance). Note: For the “Method” feature, if you leave it unselected, it defaults to in-person.</li>
           <li style="margin-left: 20px;">Click “Calculate &amp; View Results” to update charts and the cost-benefit analysis.</li>
           <li style="margin-left: 20px;">Examine the <strong>WTP Results</strong> tab to see the monetary value respondents assign to each attribute.</li>
-          <li style="margin-left: 20px;">Check the <strong>Predicted Programme Uptake</strong> tab to view the predicted uptake percentage and dynamic recommendations.</li>
-          <li style="margin-left: 20px;">Review the <strong>Costs &amp; Benefits</strong> tab for an interactive cost breakdown with educational summaries explaining key modelling assumptions.</li>
+          <li style="margin-left: 20px;">Check the <strong>Predicted Programme Uptake</strong> tab to view the uptake percentage and dynamic recommendations that consider all features.</li>
+          <li style="margin-left: 20px;">Review the <strong>Costs &amp; Benefits</strong> tab for a detailed breakdown with educational summaries.</li>
           <li style="margin-left: 20px;">Save and compare different scenarios in the <strong>Scenarios</strong> tab or export the results to PDF.</li>
         </ol>
       </div>
@@ -92,6 +92,7 @@
               <path d="M10 15l-3-3 1.4-1.4 1.6 1.6L15 7l1.4 1.4-6.4 6.4z" fill="#2980b9"/>
             </svg>
             <div class="tooltip" role="tooltip">
+              <strong>Reference: A$[Baseline]</strong><br/>
               The out-of-pocket fee (in AUD) participants must pay each time they attend.
             </div>
           </div>
@@ -108,7 +109,8 @@
               <path d="M12 4a8 8 0 0 1 0 16 8 8 0 0 1 0-16z" fill="#e67e22"/>
             </svg>
             <div class="tooltip" role="tooltip">
-              Determines if the programme is offered locally (up to 12 km) or in a wider community (50+ km), affecting mobility, transport costs, and convenience.
+              <strong>Reference: At Home</strong><br/>
+              Determines if the programme is offered locally (up to 12 km) or in a wider community (50+ km).
             </div>
           </div>
           <div class="attribute-content">
@@ -124,6 +126,7 @@
               <path d="M12 6v6l4 2" stroke="#27ae60" stroke-width="2" fill="none"/>
             </svg>
             <div class="tooltip" role="tooltip">
+              <strong>Reference: Daily</strong><br/>
               Weekly sessions promote more frequent social engagement compared to monthly sessions.
             </div>
           </div>
@@ -140,6 +143,7 @@
               <path d="M8 12h8M12 8v8" stroke="#8e44ad" stroke-width="2" fill="none"/>
             </svg>
             <div class="tooltip" role="tooltip">
+              <strong>Reference: In-person</strong><br/>
               Virtual sessions are delivered online; hybrid sessions combine in-person and virtual elements.
             </div>
           </div>
@@ -156,6 +160,7 @@
               <path d="M12 6v6l4 2" stroke="#3498db" stroke-width="2" fill="none"/>
             </svg>
             <div class="tooltip" role="tooltip">
+              <strong>Reference: 30-minute</strong><br/>
               2-hour or 4-hour sessions affect both the depth of interaction and scheduling flexibility.
             </div>
           </div>
@@ -172,6 +177,7 @@
               <path d="M8 12l2-2 4 4 6-6" stroke="#e74c3c" stroke-width="2" fill="none"/>
             </svg>
             <div class="tooltip" role="tooltip">
+              <strong>Reference: Peer Support</strong><br/>
               Options include community engagement, psychological counselling, or VR-based sessions.
             </div>
           </div>
@@ -220,6 +226,7 @@
                   <input type="radio" name="method" id="hybridCheck" value="hybrid" />
                   Hybrid (In-person &amp; Virtual)
                 </label>
+                <!-- If none selected, assume in-person -->
               </div>
             </div>
             <!-- Frequency Card -->
@@ -354,7 +361,7 @@
         </div>
         <div class="chart-grid">
           <div class="chart-box">
-            <h3>Uptake Probability</h3>
+            <h3>Predicted Uptake</h3>
             <canvas id="probChartMain"></canvas>
           </div>
         </div>
