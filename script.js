@@ -9,6 +9,8 @@
 /** On page load, set default tab */
 window.onload = function() {
   openTab('introTab', document.querySelector('.tablink'));
+  // Enable filtering when filterSelect changes.
+  document.getElementById("filterSelect").addEventListener("change", filterScenarios);
 };
 
 /** Tab Switching Function */
@@ -91,42 +93,36 @@ function buildScenarioFromInputs() {
   const state = document.getElementById("state_select").value;
   const adjustCosts = document.getElementById("adjustCosts").value;
   const cost_val = parseInt(document.getElementById("costSlider").value, 10);
-  const localCheck = document.getElementById("localCheck").checked;
-  const widerCheck = document.getElementById("widerCheck").checked;
-  const weeklyCheck = document.getElementById("weeklyCheck").checked;
-  const monthlyCheck = document.getElementById("monthlyCheck").checked;
-  const virtualCheck = document.getElementById("virtualCheck").checked;
-  const hybridCheck = document.getElementById("hybridCheck").checked;
-  const twoHCheck = document.getElementById("twoHCheck").checked;
-  const fourHCheck = document.getElementById("fourHCheck").checked;
-  const commCheck = document.getElementById("commCheck").checked;
-  const psychCheck = document.getElementById("psychCheck").checked;
-  const vrCheck = document.getElementById("vrCheck").checked;
+  
+  // Get radio selections from input-level cards
+  const support = document.querySelector('input[name="support"]:checked');
+  const method = document.querySelector('input[name="method"]:checked');
+  const frequency = document.querySelector('input[name="frequency"]:checked');
+  const duration = document.querySelector('input[name="duration"]:checked');
+  const accessibility = document.querySelector('input[name="accessibility"]:checked');
 
-  if ([commCheck, psychCheck, vrCheck].filter(Boolean).length > 1) {
-    alert("Select only one Support Programme: Community, Counselling, or VR.");
+  if (!support || !method || !frequency || !duration || !accessibility) {
+    alert("Please select a level for all input cards.");
     return null;
   }
-  if ([virtualCheck, hybridCheck].filter(Boolean).length > 1) {
-    alert("Select only one Method: Virtual or Hybrid.");
-    return null;
-  }
-  if (localCheck && widerCheck) {
-    alert("Cannot select both Local and Wider Community.");
-    return null;
-  }
-  if (weeklyCheck && monthlyCheck) {
-    alert("Cannot select both Weekly and Monthly.");
-    return null;
-  }
-  if (twoHCheck && fourHCheck) {
-    alert("Cannot select both 2-Hour and 4-Hour sessions.");
-    return null;
-  }
-  if (adjustCosts === 'yes' && !state) {
-    alert("Select a state when adjusting cost-of-living.");
-    return null;
-  }
+
+  // Determine boolean flags for support type
+  const commCheck = support.value === "community";
+  const psychCheck = support.value === "counselling";
+  const vrCheck = support.value === "vr";
+
+  const virtualCheck = method.value === "virtual";
+  const hybridCheck = method.value === "hybrid";
+
+  const weeklyCheck = frequency.value === "weekly";
+  const monthlyCheck = frequency.value === "monthly";
+
+  const twoHCheck = duration.value === "2hr";
+  const fourHCheck = duration.value === "4hr";
+
+  const localCheck = accessibility.value === "local";
+  const widerCheck = accessibility.value === "wider";
+
   // Compute predicted uptake and net benefit for later use:
   const uptake = computeProbability({ state, adjustCosts, cost_val, localCheck, widerCheck, weeklyCheck, monthlyCheck, virtualCheck, hybridCheck, twoHCheck, fourHCheck, commCheck, psychCheck, vrCheck }, mainCoefficients) * 100;
   const baseParticipants = 250;
@@ -266,7 +262,7 @@ function toggleBenefitsAnalysis() {
 }
 
 /***************************************************************************
- * Scenario Saving & PDF Export
+ * Scenario Saving, Filtering & PDF Export
  ***************************************************************************/
 let savedScenarios = [];
 function saveScenario() {
@@ -291,6 +287,27 @@ function saveScenario() {
   tableBody.appendChild(row);
   alert(`Scenario "${scenario.name}" saved successfully.`);
 }
+
+function filterScenarios() {
+  const filterVal = document.getElementById("filterSelect").value;
+  const rows = document.querySelectorAll("#scenarioTable tbody tr");
+  rows.forEach(row => {
+    if (filterVal === "all") {
+      row.style.display = "";
+    } else if (filterVal === "community") {
+      const cell = row.cells[12]; // Community column (0-indexed)
+      row.style.display = (cell && cell.textContent.trim().toLowerCase() === "yes") ? "" : "none";
+    } else if (filterVal === "counselling") {
+      const cell = row.cells[13]; // Counselling column
+      row.style.display = (cell && cell.textContent.trim().toLowerCase() === "yes") ? "" : "none";
+    } else if (filterVal === "vr") {
+      const cell = row.cells[14]; // VR column
+      row.style.display = (cell && cell.textContent.trim().toLowerCase() === "yes") ? "" : "none";
+    }
+  });
+}
+
+document.getElementById("filterSelect").addEventListener("change", filterScenarios);
 
 function openComparison() {
   if (savedScenarios.length < 2) {
@@ -356,7 +373,7 @@ let combinedChartInstance = null;
 const QALY_SCENARIOS_VALUES = { low: 0.02, moderate: 0.05, high: 0.1 };
 const VALUE_PER_QALY = 50000;
 // Cost components as provided:
-const FIXED_COSTS = { advertisement: 2978.80 }; // Advertisements in Local Press
+const FIXED_COSTS = { advertisement: 2978.80 };
 const VARIABLE_COSTS = { 
   printing: 0.12 * 10000, 
   postage: 0.15 * 10000, 
@@ -496,10 +513,15 @@ function renderProbChart() {
       }
     }
   });
-  let interpretation = pVal < 30 ? "Low uptake. Adjust programme cost or enhance local accessibility." :
-                       pVal < 70 ? "Moderate uptake. Consider increasing session frequency or optimising cost." :
-                       "High uptake. The current configuration is effective.";
-  alert(`Predicted uptake: ${pVal.toFixed(2)}%. ${interpretation}`);
+  let recommendation = "";
+  if (pVal < 30) {
+    recommendation = "Low uptake. Consider reducing cost, enhancing community engagement, and extending interaction duration.";
+  } else if (pVal < 70) {
+    recommendation = "Moderate uptake. Consider slight adjustments in cost, increasing the emphasis on community engagement, and lengthening interaction duration.";
+  } else {
+    recommendation = "High uptake. The current configuration is effective; maintain emphasis on community engagement and flexible interaction durations.";
+  }
+  alert(`Predicted uptake: ${pVal.toFixed(2)}%.\n${recommendation}`);
 }
 
 /***************************************************************************
