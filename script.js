@@ -3,7 +3,7 @@
  * Enhanced tabs with working icons and tooltips, improved Inputs layout
  * using level cards with info icons that show tooltips on hover, interactive
  * Cost-Benefits section with toggle buttons and a combined bar chart,
- * dynamic recommendations for predicted uptake, and export to PDF functionality.
+ * dynamic recommendations based on all features, and export to PDF functionality.
  ****************************************************************************/
 
 /** On page load, set default tab */
@@ -94,23 +94,30 @@ function buildScenarioFromInputs() {
   
   // Get radio selections from input-level cards
   const support = document.querySelector('input[name="support"]:checked');
+  // For method, if none selected, default to in-person (i.e. virtualCheck and hybridCheck false)
   const method = document.querySelector('input[name="method"]:checked');
   const frequency = document.querySelector('input[name="frequency"]:checked');
   const duration = document.querySelector('input[name="duration"]:checked');
   const accessibility = document.querySelector('input[name="accessibility"]:checked');
 
-  if (!support || !method || !frequency || !duration || !accessibility) {
-    alert("Please select a level for all input cards.");
+  // For support, frequency, duration, and accessibility selection is required.
+  if (!support || !frequency || !duration || !accessibility) {
+    alert("Please select a level for all required input cards.");
     return null;
   }
-
+  
+  // For method, if not selected, default to in-person (i.e. neither virtual nor hybrid)
+  let virtualCheck = false;
+  let hybridCheck = false;
+  if (method) {
+    virtualCheck = method.value === "virtual";
+    hybridCheck = method.value === "hybrid";
+  }
+  
   // Determine boolean flags for support type
   const commCheck = support.value === "community";
   const psychCheck = support.value === "counselling";
   const vrCheck = support.value === "vr";
-
-  const virtualCheck = method.value === "virtual";
-  const hybridCheck = method.value === "hybrid";
 
   const weeklyCheck = frequency.value === "weekly";
   const monthlyCheck = frequency.value === "monthly";
@@ -344,140 +351,55 @@ function openComparison() {
 }
 
 /***************************************************************************
- * Combined Costs & Benefits Rendering (Bar Chart)
- ***************************************************************************/
-let combinedChartInstance = null;
-const QALY_SCENARIOS_VALUES = { low: 0.02, moderate: 0.05, high: 0.1 };
-const VALUE_PER_QALY = 50000;
-// Cost components as provided:
-const FIXED_COSTS = { advertisement: 2978.80 };
-const VARIABLE_COSTS = { 
-  printing: 0.12 * 10000, 
-  postage: 0.15 * 10000, 
-  admin: 49.99 * 10, 
-  trainer: 223.86 * 100, 
-  oncosts: 44.77 * 100, 
-  facilitator: 100.00 * 100, 
-  materials: 50.00 * 100, 
-  venue: 15.00 * 100, 
-  sessionTime: 20.00 * 250, 
-  travel: 10.00 * 250 
-};
-const FIXED_TOTAL = FIXED_COSTS.advertisement + 26863.00;
-const VARIABLE_TOTAL = VARIABLE_COSTS.printing + VARIABLE_COSTS.postage + VARIABLE_COSTS.admin + VARIABLE_COSTS.trainer +
-                         VARIABLE_COSTS.oncosts + VARIABLE_COSTS.facilitator + VARIABLE_COSTS.materials +
-                         VARIABLE_COSTS.venue + VARIABLE_COSTS.sessionTime + VARIABLE_COSTS.travel;
-
-function renderCostsBenefits() {
-  const scenario = buildScenarioFromInputs();
-  if (!scenario) return;
-  const pVal = computeProbability(scenario, mainCoefficients);
-  const uptakePercentage = pVal * 100;
-  const baseParticipants = 250;
-  const numberOfParticipants = baseParticipants * pVal;
-  const qalyScenario = document.getElementById("qalySelect").value;
-  const qalyPerParticipant = QALY_SCENARIO_VALUES[qalyScenario];
-  const totalQALY = numberOfParticipants * qalyPerParticipant;
-  const monetizedBenefits = totalQALY * VALUE_PER_QALY;
-  const totalInterventionCost = FIXED_TOTAL + (VARIABLE_TOTAL * pVal);
-  const costPerPerson = totalInterventionCost / numberOfParticipants;
-  const netBenefit = monetizedBenefits - totalInterventionCost;
-  
-  // Update scenario values for saving
-  scenario.predictedUptake = uptakePercentage.toFixed(2);
-  scenario.netBenefit = netBenefit.toFixed(2);
-  
-  const costsTab = document.getElementById("costsBenefitsResults");
-  costsTab.innerHTML = "";
-  
-  // Render summary information with educational explanation
-  const summaryDiv = document.createElement("div");
-  summaryDiv.className = "calculation-info";
-  summaryDiv.innerHTML = `
-    <h4>Cost &amp; Benefits Analysis</h4>
-    <p><strong>Uptake:</strong> ${uptakePercentage.toFixed(2)}%</p>
-    <p><strong>Participants:</strong> ${numberOfParticipants.toFixed(0)}</p>
-    <p><strong>Total Intervention Cost:</strong> A$${totalInterventionCost.toFixed(2)}</p>
-    <p><strong>Cost per Participant:</strong> A$${costPerPerson.toFixed(2)}</p>
-    <p><strong>Total QALYs:</strong> ${totalQALY.toFixed(2)}</p>
-    <p><strong>Monetised Benefits:</strong> A$${monetizedBenefits.toLocaleString()}</p>
-    <p><strong>Net Benefit:</strong> A$${netBenefit.toLocaleString()}</p>
-    <p>This analysis combines fixed costs (advertisements in local press and training) and variable costs (printing, postage, administrative personnel, trainer cost, on-costs, facilitator salaries, material costs, venue hire, session time and travel). Benefits are calculated based on QALY gains multiplied by A$50,000.</p>
-  `;
-  costsTab.appendChild(summaryDiv);
-  
-  // Render combined cost-benefit bar chart
-  const combinedChartContainer = document.createElement("div");
-  combinedChartContainer.id = "combinedChartContainer";
-  combinedChartContainer.innerHTML = `<canvas id="combinedChart"></canvas>`;
-  costsTab.appendChild(combinedChartContainer);
-  
-  const ctxCombined = document.getElementById("combinedChart").getContext("2d");
-  if (combinedChartInstance) combinedChartInstance.destroy();
-  combinedChartInstance = new Chart(ctxCombined, {
-    type: 'bar',
-    data: {
-      labels: ["Total Cost", "Monetised Benefits", "Net Benefit"],
-      datasets: [{
-        label: "A$",
-        data: [totalInterventionCost, monetizedBenefits, netBenefit],
-        backgroundColor: [
-          'rgba(220,53,69,0.6)',
-          'rgba(40,167,69,0.6)',
-          'rgba(255,193,7,0.6)'
-        ],
-        borderColor: [
-          'rgba(220,53,69,1)',
-          'rgba(40,167,69,1)',
-          'rgba(255,193,7,1)'
-        ],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: false },
-        title: { display: true, text: "Combined Cost-Benefit Analysis", font: { size: 16 } }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          suggestedMax: Math.max(totalInterventionCost, monetizedBenefits, Math.abs(netBenefit)) * 1.2
-        }
-      }
-    }
-  });
-}
-
-/***************************************************************************
- * Integration: Calculate & View Results
- ***************************************************************************/
-function openSingleScenario() {
-  renderProbChart();
-  renderCostsBenefits();
-}
-
-/***************************************************************************
  * Dynamic Recommendation for Predicted Programme Uptake
  ***************************************************************************/
 function getRecommendation(scenario, uptake) {
-  let rec = "";
-  if (uptake < 30) {
-    if (scenario.virtualCheck) {
-      rec += "Uptake is low. Consider switching from a fully virtual method to a hybrid approach.";
-    }
-    if (scenario.twoHCheck) {
-      rec += " Consider extending interaction duration.";
-    }
-    if (scenario.weeklyCheck === false && scenario.monthlyCheck) {
-      rec += " Increasing session frequency may help.";
-    }
-  } else if (uptake < 70) {
-    rec = "Uptake is moderate. A slight adjustment in method (e.g. moving toward a hybrid model) and session duration may boost participation.";
+  let rec = "Recommendation: ";
+  
+  // Consider method: if no method selected, assume in-person.
+  if (!scenario.virtualCheck && !scenario.hybridCheck) {
+    rec += "Method defaults to In-person. ";
   } else {
-    rec = "Uptake is high. The configuration is effective; continue with the current settings.";
+    if (scenario.virtualCheck && uptake < 50) {
+      rec += "Fully virtual delivery appears to lower uptake. Consider switching to a hybrid approach. ";
+    }
+    if (scenario.hybridCheck && uptake < 50) {
+      rec += "Hybrid method may need improvement – consider emphasizing in-person elements. ";
+    }
   }
+  
+  // Consider support type
+  if (scenario.commCheck && uptake < 40) {
+    rec += "Community engagement may need further promotion. ";
+  }
+  if (scenario.psychCheck && uptake < 40) {
+    rec += "Counselling might be less appealing; consider bolstering community support. ";
+  }
+  if (scenario.vrCheck && uptake < 40) {
+    rec += "VR-based sessions might not be optimal for uptake; consider alternative support models. ";
+  }
+  
+  // Consider frequency and duration
+  if (scenario.weeklyCheck === false && scenario.monthlyCheck && uptake < 50) {
+    rec += "Increasing session frequency (e.g. from monthly to weekly) may boost uptake. ";
+  }
+  if (scenario.twoHCheck && uptake < 50) {
+    rec += "Longer interactions might deter participation; consider a shorter duration. ";
+  }
+  if (scenario.fourHCheck && uptake >= 70) {
+    rec += "Longer interactions seem effective; continue with current duration. ";
+  }
+  
+  // Consider accessibility – if wider community is selected and uptake is low, suggest local service
+  if (scenario.widerCheck && uptake < 50) {
+    rec += "Offering the programme locally may improve uptake. ";
+  }
+  
+  // If uptake is high, praise configuration
+  if (uptake >= 70) {
+    rec = "Uptake is high. The current configuration appears effective. ";
+  }
+  
   return rec;
 }
 
@@ -491,10 +413,12 @@ function renderProbChart() {
   const pVal = computeProbability(scenario, mainCoefficients) * 100;
   const ctx = document.getElementById("probChartMain").getContext("2d");
   if (probChartInstance) probChartInstance.destroy();
+  
+  // Create a horizontal bar chart with data labels using Chart.js plugin "datalabels" (if desired)
   probChartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: ["Programme Uptake (%)"],
+      labels: ["Predicted Uptake (%)"],
       datasets: [{
         label: 'Uptake (%)',
         data: [pVal],
@@ -509,12 +433,20 @@ function renderProbChart() {
       scales: { x: { beginAtZero: true, max: 100 } },
       plugins: {
         legend: { display: false },
-        title: { display: true, text: `Predicted Uptake: ${pVal.toFixed(2)}%`, font: { size: 16 } }
+        title: { display: true, text: `Predicted Programme Uptake: ${pVal.toFixed(2)}%`, font: { size: 16 } },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return `${context.parsed.x.toFixed(2)}%`;
+            }
+          }
+        }
       }
     }
   });
+  
   const recommendation = getRecommendation(scenario, pVal);
-  alert(`Predicted uptake: ${pVal.toFixed(2)}%.\nRecommendation: ${recommendation}`);
+  alert(`Predicted uptake: ${pVal.toFixed(2)}%.\n${recommendation}`);
 }
 
 /***************************************************************************
