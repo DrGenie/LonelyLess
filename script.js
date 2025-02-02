@@ -2,8 +2,9 @@
  * SCRIPT.JS
  * Enhanced tabs with working icons and tooltips, improved Inputs layout
  * using level cards with info icons that show tooltips on hover, interactive
- * Cost-Benefits section with toggle buttons and a combined bar chart,
- * dynamic recommendations based on all features, and export to PDF functionality.
+ * Cost-Benefits section with summary and combined bar chart,
+ * dynamic recommendations for predicted uptake using a doughnut chart,
+ * and export to PDF functionality.
  ****************************************************************************/
 
 /** On page load, set default tab */
@@ -26,6 +27,7 @@ function openTab(tabId, btn) {
   btn.classList.add("active");
   btn.setAttribute("aria-selected", "true");
 
+  // Automatically render charts when switching to these tabs.
   if (tabId === 'wtpTab') renderWTPChart();
   if (tabId === 'costsTab') renderCostsBenefits();
 }
@@ -98,7 +100,7 @@ function buildScenarioFromInputs() {
   const duration = document.querySelector('input[name="duration"]:checked');
   const accessibility = document.querySelector('input[name="accessibility"]:checked');
   
-  // Method is optional; if not selected, assume in-person (i.e. both virtual and hybrid false)
+  // Method is optional; if not selected, assume in-person (both virtual and hybrid false)
   const method = document.querySelector('input[name="method"]:checked');
   let virtualCheck = false, hybridCheck = false;
   if (method) {
@@ -126,7 +128,7 @@ function buildScenarioFromInputs() {
   const localCheck = accessibility.value === "local";
   const widerCheck = accessibility.value === "wider";
 
-  // Compute predicted uptake and net benefit for later use:
+  // Compute predicted uptake and net benefit:
   const uptake = computeProbability({ state, adjustCosts, cost_val, localCheck, widerCheck, weeklyCheck, monthlyCheck, virtualCheck, hybridCheck, twoHCheck, fourHCheck, commCheck, psychCheck, vrCheck }, mainCoefficients) * 100;
   const baseParticipants = 250;
   const numberOfParticipants = baseParticipants * computeProbability({ state, adjustCosts, cost_val, localCheck, widerCheck, weeklyCheck, monthlyCheck, virtualCheck, hybridCheck, twoHCheck, fourHCheck, commCheck, psychCheck, vrCheck }, mainCoefficients);
@@ -349,9 +351,19 @@ function openComparison() {
 }
 
 /***************************************************************************
- * Draw Uptake Chart (Doughnut)
+ * Render Predicted Programme Uptake Chart (Doughnut) with Dynamic Recommendations
  ***************************************************************************/
 let uptakeChart = null;
+function renderProbChart() {
+  const scenario = buildScenarioFromInputs();
+  if (!scenario) return;
+  const pVal = computeProbability(scenario, mainCoefficients) * 100;
+  drawUptakeChart(pVal);
+  const recommendation = getRecommendation(scenario, pVal);
+  alert(`Predicted uptake: ${pVal.toFixed(1)}%.\n${recommendation}`);
+}
+
+/** Draw Uptake Chart (Doughnut) */
 function drawUptakeChart(uptakeVal) {
   const ctx = document.getElementById("uptakeChart").getContext("2d");
   if (uptakeChart) uptakeChart.destroy();
@@ -372,6 +384,13 @@ function drawUptakeChart(uptakeVal) {
           display: true,
           text: `Predicted Programme Uptake: ${uptakeVal.toFixed(1)}%`,
           font: { size: 16 }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return `${context.label}: ${context.parsed.toFixed(1)}%`;
+            }
+          }
         }
       }
     }
@@ -384,60 +403,50 @@ function drawUptakeChart(uptakeVal) {
 function getRecommendation(scenario, uptake) {
   let rec = "Recommendation: ";
   
-  // Consider method – if virtual selected and uptake is low, suggest hybrid/in-person
-  if (scenario.virtualCheck && uptake < 50) {
-    rec += "Virtual delivery seems to lower uptake. Consider switching to a hybrid or in-person method. ";
-  } else if (scenario.hybridCheck && uptake < 50) {
-    rec += "Hybrid delivery may be improved by increasing in-person elements. ";
-  } else if (!scenario.virtualCheck && !scenario.hybridCheck) {
-    rec += "Method defaults to in-person. ";
+  // Method: if none selected assume in-person.
+  if (!scenario.virtualCheck && !scenario.hybridCheck) {
+    rec += "Delivery defaults to in-person. ";
+  } else {
+    if (scenario.virtualCheck && uptake < 50) {
+      rec += "Fully virtual delivery appears to lower uptake; consider a hybrid or in-person method. ";
+    }
+    if (scenario.hybridCheck && uptake < 50) {
+      rec += "Hybrid delivery may benefit from more in-person elements. ";
+    }
   }
   
-  // Consider support type
+  // Support type
   if (scenario.commCheck && uptake < 40) {
-    rec += "Community engagement might need more promotion. ";
+    rec += "Enhance promotion of community engagement. ";
   }
   if (scenario.psychCheck && uptake < 40) {
-    rec += "Counselling alone might be less attractive; consider integrating community support. ";
+    rec += "Counselling might be improved by integrating community support. ";
   }
   if (scenario.vrCheck && uptake < 40) {
-    rec += "VR-based sessions may be less effective for uptake; consider alternative models. ";
+    rec += "VR-based sessions seem less effective; consider alternative support. ";
   }
   
-  // Frequency and Duration adjustments
+  // Frequency and Duration
   if (scenario.monthlyCheck && uptake < 50) {
-    rec += "Increasing session frequency (e.g. from monthly to weekly) could improve uptake. ";
+    rec += "Switch from monthly to weekly sessions to boost engagement. ";
   }
   if (scenario.twoHCheck && uptake < 50) {
-    rec += "Shorter interactions might be more appealing. ";
+    rec += "Consider shorter interactions for better participation. ";
   }
   if (scenario.fourHCheck && uptake >= 70) {
-    rec += "Longer interactions appear effective. ";
+    rec += "Longer interactions are working well. ";
   }
   
-  // Accessibility: if wider community is selected and uptake is low, suggest local delivery
+  // Accessibility
   if (scenario.widerCheck && uptake < 50) {
-    rec += "Consider offering the programme locally. ";
+    rec += "Offering the programme locally may improve uptake. ";
   }
   
-  // If uptake is high, praise the configuration
   if (uptake >= 70) {
-    rec = "Uptake is high. The current configuration appears effective.";
+    rec = "Uptake is high. The current configuration is effective.";
   }
   
   return rec;
-}
-
-/***************************************************************************
- * Render Predicted Programme Uptake Chart with Dynamic Recommendations
- ***************************************************************************/
-function renderProbChart() {
-  const scenario = buildScenarioFromInputs();
-  if (!scenario) return;
-  const pVal = computeProbability(scenario, mainCoefficients) * 100;
-  drawUptakeChart(pVal);
-  const recommendation = getRecommendation(scenario, pVal);
-  alert(`Predicted uptake: ${pVal.toFixed(1)}%.\n${recommendation}`);
 }
 
 /***************************************************************************
@@ -446,7 +455,6 @@ function renderProbChart() {
 let combinedChartInstance = null;
 const QALY_SCENARIO_VALUES = { low: 0.02, moderate: 0.05, high: 0.1 };
 const VALUE_PER_QALY = 50000;
-// Cost components as provided:
 const FIXED_COSTS = { advertisement: 2978.80 };
 const VARIABLE_COSTS = { 
   printing: 0.12 * 10000, 
@@ -480,14 +488,12 @@ function renderCostsBenefits() {
   const costPerPerson = totalInterventionCost / numberOfParticipants;
   const netBenefit = monetizedBenefits - totalInterventionCost;
   
-  // Update scenario values for saving
   scenario.predictedUptake = uptakePercentage.toFixed(2);
   scenario.netBenefit = netBenefit.toFixed(2);
   
   const costsTab = document.getElementById("costsBenefitsResults");
   costsTab.innerHTML = "";
   
-  // Render summary information with educational explanation
   const summaryDiv = document.createElement("div");
   summaryDiv.className = "calculation-info";
   summaryDiv.innerHTML = `
@@ -499,11 +505,10 @@ function renderCostsBenefits() {
     <p><strong>Total QALYs:</strong> ${totalQALY.toFixed(2)}</p>
     <p><strong>Monetised Benefits:</strong> A$${monetizedBenefits.toLocaleString()}</p>
     <p><strong>Net Benefit:</strong> A$${netBenefit.toLocaleString()}</p>
-    <p>This analysis combines fixed costs (advertisements in local press and training) and variable costs (printing, postage, administrative personnel, trainer cost, on‑costs, facilitator salaries, material costs, venue hire, session time and travel). Benefits are calculated based on QALY gains multiplied by A$50,000.</p>
+    <p>This analysis combines fixed costs (advertisements and training) and variable costs (printing, postage, administrative personnel, trainer cost, on‑costs, facilitator salaries, material costs, venue hire, session time, and travel). Benefits are calculated based on QALY gains multiplied by A$50,000.</p>
   `;
   costsTab.appendChild(summaryDiv);
   
-  // Render combined cost-benefit bar chart
   const combinedChartContainer = document.createElement("div");
   combinedChartContainer.id = "combinedChartContainer";
   combinedChartContainer.innerHTML = `<canvas id="combinedChart"></canvas>`;
@@ -551,7 +556,6 @@ function renderCostsBenefits() {
  * Integration: Calculate & View Results
  ***************************************************************************/
 function openSingleScenario() {
-  // When clicking calculate, immediately update the results.
   renderProbChart();
   renderCostsBenefits();
 }
@@ -609,47 +613,47 @@ function drawUptakeChart(uptakeVal) {
 function getRecommendation(scenario, uptake) {
   let rec = "Recommendation: ";
   
-  // Method (if none selected, assume in-person)
+  // Method: if none selected, assume in-person.
   if (!scenario.virtualCheck && !scenario.hybridCheck) {
-    rec += "Method defaults to in-person. ";
+    rec += "Delivery defaults to in-person. ";
   } else {
     if (scenario.virtualCheck && uptake < 50) {
-      rec += "Fully virtual delivery may lower uptake; consider a hybrid approach. ";
+      rec += "Fully virtual delivery may lower uptake; consider a hybrid or in-person approach. ";
     }
     if (scenario.hybridCheck && uptake < 50) {
-      rec += "Hybrid delivery could benefit from more in-person elements. ";
+      rec += "Hybrid delivery may benefit from more in-person elements. ";
     }
   }
   
   // Support Type
   if (scenario.commCheck && uptake < 40) {
-    rec += "Increase emphasis on community engagement. ";
+    rec += "Promote community engagement more strongly. ";
   }
   if (scenario.psychCheck && uptake < 40) {
-    rec += "Integrate community support to boost counselling appeal. ";
+    rec += "Consider combining counselling with community support. ";
   }
   if (scenario.vrCheck && uptake < 40) {
-    rec += "VR-based sessions may need to be complemented with traditional support. ";
+    rec += "VR-based sessions might need to be supplemented with traditional support. ";
   }
   
   // Frequency and Duration
   if (scenario.monthlyCheck && uptake < 50) {
-    rec += "Consider increasing session frequency to weekly. ";
+    rec += "Switch from monthly to weekly sessions to improve uptake. ";
   }
   if (scenario.twoHCheck && uptake < 50) {
-    rec += "Shorter interactions might encourage participation. ";
+    rec += "Shorter interactions may attract more participants. ";
   }
   if (scenario.fourHCheck && uptake >= 70) {
-    rec += "Longer interactions appear effective. ";
+    rec += "Longer interactions are effective. ";
   }
   
   // Accessibility
   if (scenario.widerCheck && uptake < 50) {
-    rec += "Offering the programme locally may improve uptake. ";
+    rec += "Offering the programme locally may boost participation. ";
   }
   
   if (uptake >= 70) {
-    rec = "Uptake is high. The current configuration is effective.";
+    rec = "Uptake is high. The current configuration appears very effective.";
   }
   
   return rec;
