@@ -3,14 +3,12 @@
  * Enhanced tabs with working icons and tooltips, improved Inputs layout
  * using level cards with info icons that show tooltips on hover, interactive
  * Cost-Benefits section with toggle buttons and a combined bar chart,
- * detailed educational summaries, and export to PDF functionality.
+ * dynamic recommendations for predicted uptake, and export to PDF functionality.
  ****************************************************************************/
 
 /** On page load, set default tab */
 window.onload = function() {
   openTab('introTab', document.querySelector('.tablink'));
-  // Enable filtering when filterSelect changes.
-  document.getElementById("filterSelect").addEventListener("change", filterScenarios);
 };
 
 /** Tab Switching Function */
@@ -262,7 +260,7 @@ function toggleBenefitsAnalysis() {
 }
 
 /***************************************************************************
- * Scenario Saving, Filtering & PDF Export
+ * Scenario Saving & PDF Export
  ***************************************************************************/
 let savedScenarios = [];
 function saveScenario() {
@@ -287,27 +285,6 @@ function saveScenario() {
   tableBody.appendChild(row);
   alert(`Scenario "${scenario.name}" saved successfully.`);
 }
-
-function filterScenarios() {
-  const filterVal = document.getElementById("filterSelect").value;
-  const rows = document.querySelectorAll("#scenarioTable tbody tr");
-  rows.forEach(row => {
-    if (filterVal === "all") {
-      row.style.display = "";
-    } else if (filterVal === "community") {
-      const cell = row.cells[12]; // Community column (0-indexed)
-      row.style.display = (cell && cell.textContent.trim().toLowerCase() === "yes") ? "" : "none";
-    } else if (filterVal === "counselling") {
-      const cell = row.cells[13]; // Counselling column
-      row.style.display = (cell && cell.textContent.trim().toLowerCase() === "yes") ? "" : "none";
-    } else if (filterVal === "vr") {
-      const cell = row.cells[14]; // VR column
-      row.style.display = (cell && cell.textContent.trim().toLowerCase() === "yes") ? "" : "none";
-    }
-  });
-}
-
-document.getElementById("filterSelect").addEventListener("change", filterScenarios);
 
 function openComparison() {
   if (savedScenarios.length < 2) {
@@ -399,7 +376,7 @@ function renderCostsBenefits() {
   const baseParticipants = 250;
   const numberOfParticipants = baseParticipants * pVal;
   const qalyScenario = document.getElementById("qalySelect").value;
-  const qalyPerParticipant = QALY_SCENARIOS_VALUES[qalyScenario];
+  const qalyPerParticipant = QALY_SCENARIO_VALUES[qalyScenario];
   const totalQALY = numberOfParticipants * qalyPerParticipant;
   const monetizedBenefits = totalQALY * VALUE_PER_QALY;
   const totalInterventionCost = FIXED_TOTAL + (VARIABLE_TOTAL * pVal);
@@ -482,7 +459,30 @@ function openSingleScenario() {
 }
 
 /***************************************************************************
- * Predicted Programme Uptake Chart
+ * Dynamic Recommendation for Predicted Programme Uptake
+ ***************************************************************************/
+function getRecommendation(scenario, uptake) {
+  let rec = "";
+  if (uptake < 30) {
+    if (scenario.virtualCheck) {
+      rec += "Uptake is low. Consider switching from a fully virtual method to a hybrid approach.";
+    }
+    if (scenario.twoHCheck) {
+      rec += " Consider extending interaction duration.";
+    }
+    if (scenario.weeklyCheck === false && scenario.monthlyCheck) {
+      rec += " Increasing session frequency may help.";
+    }
+  } else if (uptake < 70) {
+    rec = "Uptake is moderate. A slight adjustment in method (e.g. moving toward a hybrid model) and session duration may boost participation.";
+  } else {
+    rec = "Uptake is high. The configuration is effective; continue with the current settings.";
+  }
+  return rec;
+}
+
+/***************************************************************************
+ * Render Predicted Programme Uptake Chart with Dynamic Recommendations
  ***************************************************************************/
 let probChartInstance = null;
 function renderProbChart() {
@@ -494,7 +494,7 @@ function renderProbChart() {
   probChartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: ["Uptake Probability"],
+      labels: ["Programme Uptake (%)"],
       datasets: [{
         label: 'Uptake (%)',
         data: [pVal],
@@ -509,19 +509,12 @@ function renderProbChart() {
       scales: { x: { beginAtZero: true, max: 100 } },
       plugins: {
         legend: { display: false },
-        title: { display: true, text: `Uptake Probability: ${pVal.toFixed(2)}%`, font: { size: 16 } }
+        title: { display: true, text: `Predicted Uptake: ${pVal.toFixed(2)}%`, font: { size: 16 } }
       }
     }
   });
-  let recommendation = "";
-  if (pVal < 30) {
-    recommendation = "Low uptake. Consider reducing cost, enhancing community engagement, and extending interaction duration.";
-  } else if (pVal < 70) {
-    recommendation = "Moderate uptake. Consider slight adjustments in cost, increasing the emphasis on community engagement, and lengthening interaction duration.";
-  } else {
-    recommendation = "High uptake. The current configuration is effective; maintain emphasis on community engagement and flexible interaction durations.";
-  }
-  alert(`Predicted uptake: ${pVal.toFixed(2)}%.\n${recommendation}`);
+  const recommendation = getRecommendation(scenario, pVal);
+  alert(`Predicted uptake: ${pVal.toFixed(2)}%.\nRecommendation: ${recommendation}`);
 }
 
 /***************************************************************************
