@@ -1,33 +1,36 @@
 /****************************************************************************
  * SCRIPT.JS
- * Enhanced tabs with working icons and tooltips, improved Inputs layout
- * using level cards with info icons that show tooltips on hover, interactive
- * Cost-Benefits section with summary and combined bar chart,
- * dynamic recommendations for predicted uptake using a doughnut chart,
- * and export to PDF functionality.
+ * Enhanced tabs with working event listeners, improved Inputs layout,
+ * interactive Cost-Benefits summary and chart, dynamic doughnut chart for
+ * predicted uptake with multi-feature recommendations, and export to PDF.
  ****************************************************************************/
 
-/** On page load, set default tab */
-window.onload = function() {
-  openTab('introTab', document.querySelector('.tablink'));
-};
+/** Attach event listeners on DOMContentLoaded */
+document.addEventListener("DOMContentLoaded", function() {
+  const tabButtons = document.querySelectorAll(".tablink");
+  tabButtons.forEach(button => {
+    button.addEventListener("click", function() {
+      openTab(this.getAttribute("data-tab"), this);
+    });
+  });
+  // Set default tab
+  openTab("introTab", tabButtons[0]);
+});
 
 /** Tab Switching Function */
 function openTab(tabId, btn) {
   const tabs = document.getElementsByClassName("tabcontent");
-  for (let tab of tabs) {
-    tab.style.display = "none";
-  }
+  Array.from(tabs).forEach(tab => tab.style.display = "none");
   const tabButtons = document.getElementsByClassName("tablink");
-  for (let button of tabButtons) {
+  Array.from(tabButtons).forEach(button => {
     button.classList.remove("active");
     button.setAttribute("aria-selected", "false");
-  }
+  });
   document.getElementById(tabId).style.display = "block";
   btn.classList.add("active");
   btn.setAttribute("aria-selected", "true");
 
-  // Automatically render charts when switching to these tabs.
+  // Render charts if needed
   if (tabId === 'wtpTab') renderWTPChart();
   if (tabId === 'costsTab') renderCostsBenefits();
 }
@@ -94,13 +97,13 @@ function buildScenarioFromInputs() {
   const adjustCosts = document.getElementById("adjustCosts").value;
   const cost_val = parseInt(document.getElementById("costSlider").value, 10);
   
-  // Get required radio selections from input-level cards
+  // Required radio selections
   const support = document.querySelector('input[name="support"]:checked');
   const frequency = document.querySelector('input[name="frequency"]:checked');
   const duration = document.querySelector('input[name="duration"]:checked');
   const accessibility = document.querySelector('input[name="accessibility"]:checked');
   
-  // Method is optional; if not selected, assume in-person (both virtual and hybrid false)
+  // Method is optional; if not selected, assume in-person (both false)
   const method = document.querySelector('input[name="method"]:checked');
   let virtualCheck = false, hybridCheck = false;
   if (method) {
@@ -108,27 +111,26 @@ function buildScenarioFromInputs() {
     hybridCheck = method.value === "hybrid";
   }
   
-  // Required fields: support, frequency, duration, accessibility
   if (!support || !frequency || !duration || !accessibility) {
     alert("Please select a level for all required input cards (Support, Frequency, Duration, Accessibility).");
     return null;
   }
   
-  // Determine boolean flags for support type
+  // Boolean flags for support type
   const commCheck = support.value === "community";
   const psychCheck = support.value === "counselling";
   const vrCheck = support.value === "vr";
-
+  
   const weeklyCheck = frequency.value === "weekly";
   const monthlyCheck = frequency.value === "monthly";
-
+  
   const twoHCheck = duration.value === "2hr";
   const fourHCheck = duration.value === "4hr";
-
+  
   const localCheck = accessibility.value === "local";
   const widerCheck = accessibility.value === "wider";
-
-  // Compute predicted uptake and net benefit:
+  
+  // Compute uptake and net benefit
   const uptake = computeProbability({ state, adjustCosts, cost_val, localCheck, widerCheck, weeklyCheck, monthlyCheck, virtualCheck, hybridCheck, twoHCheck, fourHCheck, commCheck, psychCheck, vrCheck }, mainCoefficients) * 100;
   const baseParticipants = 250;
   const numberOfParticipants = baseParticipants * computeProbability({ state, adjustCosts, cost_val, localCheck, widerCheck, weeklyCheck, monthlyCheck, virtualCheck, hybridCheck, twoHCheck, fourHCheck, commCheck, psychCheck, vrCheck }, mainCoefficients);
@@ -403,12 +405,12 @@ function drawUptakeChart(uptakeVal) {
 function getRecommendation(scenario, uptake) {
   let rec = "Recommendation: ";
   
-  // Method: if none selected assume in-person.
+  // Method: if none selected, assume in-person.
   if (!scenario.virtualCheck && !scenario.hybridCheck) {
     rec += "Delivery defaults to in-person. ";
   } else {
     if (scenario.virtualCheck && uptake < 50) {
-      rec += "Fully virtual delivery appears to lower uptake; consider a hybrid or in-person method. ";
+      rec += "Fully virtual delivery may lower uptake; consider a hybrid or in-person approach. ";
     }
     if (scenario.hybridCheck && uptake < 50) {
       rec += "Hybrid delivery may benefit from more in-person elements. ";
@@ -420,26 +422,26 @@ function getRecommendation(scenario, uptake) {
     rec += "Enhance promotion of community engagement. ";
   }
   if (scenario.psychCheck && uptake < 40) {
-    rec += "Counselling might be improved by integrating community support. ";
+    rec += "Integrate community support with counselling. ";
   }
   if (scenario.vrCheck && uptake < 40) {
-    rec += "VR-based sessions seem less effective; consider alternative support. ";
+    rec += "Consider supplementing VR sessions with traditional support. ";
   }
   
   // Frequency and Duration
   if (scenario.monthlyCheck && uptake < 50) {
-    rec += "Switch from monthly to weekly sessions to boost engagement. ";
+    rec += "Increase session frequency from monthly to weekly. ";
   }
   if (scenario.twoHCheck && uptake < 50) {
-    rec += "Consider shorter interactions for better participation. ";
+    rec += "Shorter interactions might attract more participants. ";
   }
   if (scenario.fourHCheck && uptake >= 70) {
-    rec += "Longer interactions are working well. ";
+    rec += "Longer interactions are effective. ";
   }
   
   // Accessibility
   if (scenario.widerCheck && uptake < 50) {
-    rec += "Offering the programme locally may improve uptake. ";
+    rec += "Offering the programme locally could boost uptake. ";
   }
   
   if (uptake >= 70) {
@@ -505,7 +507,7 @@ function renderCostsBenefits() {
     <p><strong>Total QALYs:</strong> ${totalQALY.toFixed(2)}</p>
     <p><strong>Monetised Benefits:</strong> A$${monetizedBenefits.toLocaleString()}</p>
     <p><strong>Net Benefit:</strong> A$${netBenefit.toLocaleString()}</p>
-    <p>This analysis combines fixed costs (advertisements and training) and variable costs (printing, postage, administrative personnel, trainer cost, on‑costs, facilitator salaries, material costs, venue hire, session time, and travel). Benefits are calculated based on QALY gains multiplied by A$50,000.</p>
+    <p>This analysis combines fixed costs (advertisements and training) with variable costs (printing, postage, administrative personnel, trainer cost, on‑costs, facilitator salaries, material costs, venue hire, session time, and travel). Benefits are calculated based on QALY gains multiplied by A$50,000.</p>
   `;
   costsTab.appendChild(summaryDiv);
   
@@ -627,21 +629,21 @@ function getRecommendation(scenario, uptake) {
   
   // Support Type
   if (scenario.commCheck && uptake < 40) {
-    rec += "Promote community engagement more strongly. ";
+    rec += "Enhance promotion of community engagement. ";
   }
   if (scenario.psychCheck && uptake < 40) {
-    rec += "Consider combining counselling with community support. ";
+    rec += "Integrate community support with counselling. ";
   }
   if (scenario.vrCheck && uptake < 40) {
-    rec += "VR-based sessions might need to be supplemented with traditional support. ";
+    rec += "Consider supplementing VR sessions with traditional support. ";
   }
   
   // Frequency and Duration
   if (scenario.monthlyCheck && uptake < 50) {
-    rec += "Switch from monthly to weekly sessions to improve uptake. ";
+    rec += "Increase session frequency from monthly to weekly. ";
   }
   if (scenario.twoHCheck && uptake < 50) {
-    rec += "Shorter interactions may attract more participants. ";
+    rec += "Shorter interactions might attract more participants. ";
   }
   if (scenario.fourHCheck && uptake >= 70) {
     rec += "Longer interactions are effective. ";
@@ -649,11 +651,11 @@ function getRecommendation(scenario, uptake) {
   
   // Accessibility
   if (scenario.widerCheck && uptake < 50) {
-    rec += "Offering the programme locally may boost participation. ";
+    rec += "Offering the programme locally could boost uptake. ";
   }
   
   if (uptake >= 70) {
-    rec = "Uptake is high. The current configuration appears very effective.";
+    rec = "Uptake is high. The current configuration is effective.";
   }
   
   return rec;
