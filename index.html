@@ -16,7 +16,7 @@
   <div class="container">
     <header>
       <h1>LonelyLessAustralia Decision Aid Tool</h1>
-      <p>This tool helps you evaluate programme configurations for reducing loneliness among older adults in Australia. It explains how costs and benefits are calculated so that users can understand the trade‐offs.</p>
+      <p>This tool helps you evaluate programme configurations for reducing loneliness. It explains how costs and benefits are calculated so that even lay users can understand the trade‐offs.</p>
     </header>
 
     <nav class="tabs" role="tablist">
@@ -57,7 +57,7 @@
           <li><strong>Attributes</strong> – Detailed explanation of programme features (hover over info icons for extra details).</li>
           <li><strong>Inputs</strong> – Configure your scenario parameters using user-friendly level cards.</li>
           <li><strong>WTP Results</strong> – View charts showing willingness-to-pay estimates.</li>
-          <li><strong>Predicted Programme Uptake</strong> – See the predicted uptake percentage and suggestions for improvements.</li>
+          <li><strong>Predicted Programme Uptake</strong> – See the predicted uptake percentage along with dynamic recommendations.</li>
           <li><strong>Costs &amp; Benefits</strong> – Analyse detailed cost components and QALY-based benefits with interactive sliders, pop-up info boxes and educational summaries.</li>
           <li><strong>Scenarios</strong> – Save, compare and export various configurations.</li>
         </ul>
@@ -73,7 +73,7 @@
           <li style="margin-left: 20px;">Configure your scenario in the <strong>Inputs</strong> tab using the level cards (hover over the info buttons for instructions).</li>
           <li style="margin-left: 20px;">Click “Calculate &amp; View Results” to update charts and the cost-benefit analysis.</li>
           <li style="margin-left: 20px;">Examine the <strong>WTP Results</strong> tab to see the monetary value respondents assign to each attribute.</li>
-          <li style="margin-left: 20px;">Check the <strong>Predicted Programme Uptake</strong> tab to view the predicted uptake percentage and suggestions for adjustments.</li>
+          <li style="margin-left: 20px;">Check the <strong>Predicted Programme Uptake</strong> tab to view the predicted uptake percentage and dynamic recommendations.</li>
           <li style="margin-left: 20px;">Review the <strong>Costs &amp; Benefits</strong> tab for an interactive cost breakdown with educational summaries explaining key modelling assumptions.</li>
           <li style="margin-left: 20px;">Save and compare different scenarios in the <strong>Scenarios</strong> tab or export the results to PDF.</li>
         </ol>
@@ -348,9 +348,7 @@
     <section id="probTab" class="tabcontent" tabindex="0">
       <div class="calculation-info">
         <h4>Predicted Programme Uptake</h4>
-        <p>
-          Click “Show Probability Plot” to compute a new bar chart based on your Inputs. The chart displays the predicted uptake percentage. Depending on whether the uptake is below 30%, between 30–70%, or above 70%, the tool provides intuitive suggestions for adjusting programme cost, enhancing accessibility, and refining desirable features such as support type and interaction duration.
-        </p>
+        <p>Click “Show Probability Plot” to compute a new bar chart based on your Inputs. The chart displays the predicted programme uptake percentage.</p>
         <div class="buttons-row">
           <button onclick="renderProbChart()">Show Probability Plot</button>
         </div>
@@ -485,15 +483,6 @@
         <div class="buttons-row">
           <button onclick="saveScenario()">Save Current Scenario</button>
           <button onclick="openComparison()">Compare &amp; Export to PDF</button>
-        </div>
-        <div class="filter-options">
-          <label for="filterSelect">Filter Scenarios:</label>
-          <select id="filterSelect">
-            <option value="all">All</option>
-            <option value="community">Community Engagement</option>
-            <option value="counselling">Counselling</option>
-            <option value="vr">Virtual Reality</option>
-          </select>
         </div>
         <div class="table-container">
           <table id="scenarioTable">
