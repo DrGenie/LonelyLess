@@ -16,7 +16,7 @@
   <div class="container">
     <header>
       <h1>LonelyLessAustralia Decision Aid Tool</h1>
-      <p>This tool helps you evaluate programme configurations for reducing loneliness in Australia. </p>
+      <p>This tool helps you evaluate programme configurations for reducing loneliness. It explains how costs and benefits are calculated so that even lay users can understand the trade‐offs.</p>
     </header>
 
     <nav class="tabs" role="tablist">
@@ -50,7 +50,7 @@
     <section id="introTab" class="tabcontent" tabindex="0" style="display: block;">
       <div class="intro-box">
         <p>
-          Loneliness affects over five million Australians, particularly older adults, causing significant health and economic challenges. This tool uses discrete choice experiment estimates to predict programme uptake probabilities, enabling personalised services based on the factors older adults value most.
+          Loneliness affects over five million Australians, particularly older adults, causing significant health and economic challenges. This tool uses discrete choice experiment estimates to predict programme uptake probabilities, enabling personalised services based on the attributes older adults value most.
         </p>
         <ul>
           <li><strong>Instructions</strong> – Step-by-step guidance.</li>
@@ -187,118 +187,138 @@
     <section id="inputsTab" class="tabcontent" tabindex="0">
       <div class="input-card">
         <h2>Programme Inputs</h2>
-        <p>Set up your scenario using the controls below. Hover over the info icons for guidance.</p>
-        <div class="form-grid">
-          <div class="form-item">
-            <label for="state_select">
-              <i class="fa-solid fa-map-marker-alt"></i> State:
-              <span class="info-container">
-                <button class="info-button" aria-label="Choose your state to adjust for cost-of-living differences." tabindex="0">
-                  <i class="fa-solid fa-info-circle"></i>
-                </button>
-                <span class="tooltip-text">Choose your state to adjust for cost-of-living differences.</span>
-              </span>
-            </label>
-            <select id="state_select">
-              <option value="">None</option>
-              <option value="NSW">New South Wales</option>
-              <option value="VIC">Victoria</option>
-              <option value="QLD">Queensland</option>
-              <option value="WA">Western Australia</option>
-              <option value="SA">South Australia</option>
-              <option value="TAS">Tasmania</option>
-              <option value="ACT">Australian Capital Territory</option>
-              <option value="NT">Northern Territory</option>
-            </select>
-            <label for="adjustCosts">
-              <i class="fa-solid fa-sync-alt"></i> Adjust for Cost of Living?
-              <span class="info-container">
-                <button class="info-button" aria-label="Select Yes to apply cost-of-living multipliers for the chosen state." tabindex="0">
-                  <i class="fa-solid fa-info-circle"></i>
-                </button>
-                <span class="tooltip-text">Select Yes to apply cost-of-living multipliers for the chosen state.</span>
-              </span>
-            </label>
-            <select id="adjustCosts">
-              <option value="no">No</option>
-              <option value="yes">Yes</option>
-            </select>
+        <p>Configure your scenario by selecting the levels for each feature below.</p>
+        <form onsubmit="event.preventDefault();">
+          <div class="input-cards">
+            <!-- Support Programme Card -->
+            <div class="input-level-card">
+              <h3>Support Programme <span class="reference">(Reference: Peer Support)</span></h3>
+              <div class="options">
+                <label>
+                  <input type="radio" name="support" id="commCheck" value="community" />
+                  Community Engagement
+                </label>
+                <label>
+                  <input type="radio" name="support" id="psychCheck" value="counselling" />
+                  Psychological Counselling
+                </label>
+                <label>
+                  <input type="radio" name="support" id="vrCheck" value="vr" />
+                  Virtual Reality
+                </label>
+              </div>
+            </div>
+            <!-- Method Card -->
+            <div class="input-level-card">
+              <h3>Method <span class="reference">(Reference: In-person)</span></h3>
+              <div class="options">
+                <label>
+                  <input type="radio" name="method" id="virtualCheck" value="virtual" />
+                  Virtual
+                </label>
+                <label>
+                  <input type="radio" name="method" id="hybridCheck" value="hybrid" />
+                  Hybrid (In-person &amp; Virtual)
+                </label>
+              </div>
+            </div>
+            <!-- Frequency Card -->
+            <div class="input-level-card">
+              <h3>Frequency <span class="reference">(Reference: Daily)</span></h3>
+              <div class="options">
+                <label>
+                  <input type="radio" name="frequency" id="weeklyCheck" value="weekly" />
+                  Weekly
+                </label>
+                <label>
+                  <input type="radio" name="frequency" id="monthlyCheck" value="monthly" />
+                  Monthly
+                </label>
+              </div>
+            </div>
+            <!-- Duration Card -->
+            <div class="input-level-card">
+              <h3>Duration <span class="reference">(Reference: 30-minute)</span></h3>
+              <div class="options">
+                <label>
+                  <input type="radio" name="duration" id="twoHCheck" value="2hr" />
+                  2-hour Interaction
+                </label>
+                <label>
+                  <input type="radio" name="duration" id="fourHCheck" value="4hr" />
+                  4-hour Interaction
+                </label>
+              </div>
+            </div>
+            <!-- Accessibility Card -->
+            <div class="input-level-card">
+              <h3>Accessibility <span class="reference">(Reference: At Home)</span></h3>
+              <div class="options">
+                <label>
+                  <input type="radio" name="accessibility" id="localCheck" value="local" />
+                  Local Area (12 km)
+                </label>
+                <label>
+                  <input type="radio" name="accessibility" id="widerCheck" value="wider" />
+                  Wider Community (50+ km)
+                </label>
+              </div>
+            </div>
+            <!-- Cost Card (Slider) -->
+            <div class="input-level-card">
+              <h3>Cost per Session (AUD)</h3>
+              <div class="options slider-option">
+                <label for="costSlider">
+                  <i class="fa-solid fa-dollar-sign"></i>
+                  <span id="costLabel">50</span>
+                </label>
+                <input type="range" id="costSlider" min="0" max="100" step="1" value="50" oninput="updateCostDisplay(this.value)" />
+              </div>
+            </div>
+            <!-- Cost-of-Living Adjustment Card -->
+            <div class="input-level-card">
+              <h3>Cost-of-Living Adjustment</h3>
+              <div class="options">
+                <label for="state_select">
+                  <i class="fa-solid fa-map-marker-alt"></i> State:
+                  <span class="info-container">
+                    <button class="info-button" aria-label="Choose your state to adjust for cost-of-living differences." tabindex="0">
+                      <i class="fa-solid fa-info-circle"></i>
+                    </button>
+                    <span class="tooltip-text">Choose your state to adjust for cost-of-living differences.</span>
+                  </span>
+                </label>
+                <select id="state_select">
+                  <option value="">None</option>
+                  <option value="NSW">New South Wales (NSW)</option>
+                  <option value="VIC">Victoria (VIC)</option>
+                  <option value="QLD">Queensland (QLD)</option>
+                  <option value="WA">Western Australia (WA)</option>
+                  <option value="SA">South Australia (SA)</option>
+                  <option value="TAS">Tasmania (TAS)</option>
+                  <option value="ACT">Australian Capital Territory (ACT)</option>
+                  <option value="NT">Northern Territory (NT)</option>
+                </select>
+                <label for="adjustCosts">
+                  <i class="fa-solid fa-sync-alt"></i> Adjust for Cost of Living?
+                  <span class="info-container">
+                    <button class="info-button" aria-label="Select Yes to apply cost-of-living multipliers for the chosen state." tabindex="0">
+                      <i class="fa-solid fa-info-circle"></i>
+                    </button>
+                    <span class="tooltip-text">Select Yes to apply cost-of-living multipliers for the chosen state.</span>
+                  </span>
+                </label>
+                <select id="adjustCosts">
+                  <option value="no">No</option>
+                  <option value="yes">Yes</option>
+                </select>
+              </div>
+            </div>
           </div>
-          <div class="form-item">
-            <label for="costSlider">
-              <i class="fa-solid fa-dollar-sign"></i> Cost per Session (AUD):
-              <span class="info-container">
-                <button class="info-button" aria-label="Use the slider to set the base cost per session." tabindex="0">
-                  <i class="fa-solid fa-info-circle"></i>
-                </button>
-                <span class="tooltip-text">Use the slider to set the base cost per session.</span>
-              </span>
-            </label>
-            <input type="range" id="costSlider" min="0" max="100" step="1" value="50" oninput="updateCostDisplay(this.value)" />
-            <span id="costLabel">50</span>
+          <div class="buttons-row">
+            <button type="button" onclick="openSingleScenario()">Calculate &amp; View Results</button>
           </div>
-          <div class="form-item">
-            <label>
-              <i class="fa-solid fa-location-arrow"></i> Accessibility:
-            </label>
-            <label>
-              <input type="checkbox" id="localCheck" /> Local Area (12 km)
-            </label>
-            <label>
-              <input type="checkbox" id="widerCheck" /> Wider Community (50+ km)
-            </label>
-          </div>
-          <div class="form-item">
-            <label>
-              <i class="fa-solid fa-calendar-alt"></i> Frequency:
-            </label>
-            <label>
-              <input type="checkbox" id="weeklyCheck" /> Weekly
-            </label>
-            <label>
-              <input type="checkbox" id="monthlyCheck" /> Monthly
-            </label>
-          </div>
-          <div class="form-item">
-            <label>
-              <i class="fa-solid fa-video"></i> Method:
-            </label>
-            <label>
-              <input type="checkbox" id="virtualCheck" /> Virtual
-            </label>
-            <label>
-              <input type="checkbox" id="hybridCheck" /> Hybrid (In-person &amp; Virtual)
-            </label>
-          </div>
-          <div class="form-item">
-            <label>
-              <i class="fa-solid fa-clock"></i> Duration:
-            </label>
-            <label>
-              <input type="checkbox" id="twoHCheck" /> 2-hour Session
-            </label>
-            <label>
-              <input type="checkbox" id="fourHCheck" /> 4-hour Session
-            </label>
-          </div>
-          <div class="form-item">
-            <label>
-              <i class="fa-solid fa-hands-helping"></i> Support Programme:
-            </label>
-            <label>
-              <input type="checkbox" id="commCheck" /> Community Engagement
-            </label>
-            <label>
-              <input type="checkbox" id="psychCheck" /> Counselling
-            </label>
-            <label>
-              <input type="checkbox" id="vrCheck" /> Virtual Reality
-            </label>
-          </div>
-        </div>
-        <div class="buttons-row">
-          <button type="button" onclick="openSingleScenario()">Calculate &amp; View Results</button>
-        </div>
+        </form>
       </div>
     </section>
 
@@ -329,7 +349,7 @@
       <div class="calculation-info">
         <h4>Predicted Programme Uptake</h4>
         <p>
-          Click “Show Probability Plot” to compute a new bar chart based on your Inputs. The chart displays the predicted uptake percentage. Depending on whether the uptake is below 30%, between 30–70%, or above 70%, the tool provides intuitive suggestions for adjusting programme cost, enhancing accessibility, or increasing interaction frequency.
+          Click “Show Probability Plot” to compute a new bar chart based on your Inputs. The chart displays the predicted uptake percentage. Depending on whether the uptake is below 30%, between 30–70%, or above 70%, the tool provides intuitive suggestions for adjusting programme cost, enhancing accessibility, and refining desirable features such as support type and interaction duration.
         </p>
         <div class="buttons-row">
           <button onclick="renderProbChart()">Show Probability Plot</button>
@@ -361,7 +381,8 @@
         <div class="modelling-assumptions">
           <h3><i class="fa-solid fa-lightbulb"></i> Modelling Assumptions</h3>
           <p>
-            Our analysis uses interactive cost sliders, pop-up info boxes and brief educational summaries to explain how costs and benefits are calculated. Hover over the info icon <i class="fa-solid fa-info-circle tooltip" data-tooltip="Fixed costs include advertisement, printing, postage, administrative personnel, training, on-costs, facilitator salaries, material costs, venue hire, session time and travel; benefits are calculated based on QALY gains multiplied by A$50,000."></i> for further details.
+            Our analysis uses interactive cost sliders, pop-up info boxes and brief educational summaries to explain how costs and benefits are calculated.
+            <br/><strong>Reference:</strong> Engel, L., Lee, Y. Y., Le, L. K. D., Lal, A., &amp; Mihalopoulos, C. (2021). Reducing loneliness to prevent depression in older adults in Australia: A modelled cost-effectiveness analysis. <em>Mental Health and Prevention, 24</em>. <a href="https://doi.org/10.1016/j.mhp.2021.200212" target="_blank">https://doi.org/10.1016/j.mhp.2021.200212</a>
           </p>
         </div>
         <div class="cost-icons">
@@ -469,6 +490,9 @@
           <label for="filterSelect">Filter Scenarios:</label>
           <select id="filterSelect">
             <option value="all">All</option>
+            <option value="community">Community Engagement</option>
+            <option value="counselling">Counselling</option>
+            <option value="vr">Virtual Reality</option>
           </select>
         </div>
         <div class="table-container">
