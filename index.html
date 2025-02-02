@@ -16,7 +16,7 @@
   <div class="container">
     <header>
       <h1>LonelyLessAustralia Decision Aid Tool</h1>
-      <p>This tool helps you evaluate programme configurations for reducing loneliness among older adults in Australia. It explains how costs and benefits are calculated so that users can understand the trade‐offs.</p>
+      <p>This tool helps you evaluate programme configurations for reducing loneliness. It explains how costs and benefits are calculated so that even lay users can understand the trade‐offs.</p>
     </header>
 
     <nav class="tabs" role="tablist">
@@ -36,7 +36,7 @@
         <i class="fa-solid fa-chart-bar"></i><span> WTP Results</span>
       </button>
       <button class="tablink" role="tab" aria-selected="false" aria-controls="probTab" onclick="openTab('probTab', this)">
-        <i class="fa-solid fa-chart-line"></i><span> Predicted Programme Uptake</span>
+        <i class="fa-solid fa-chart-pie"></i><span> Predicted Programme Uptake</span>
       </button>
       <button class="tablink" role="tab" aria-selected="false" aria-controls="costsTab" onclick="openTab('costsTab', this)">
         <i class="fa-solid fa-calculator"></i><span> Costs &amp; Benefits</span>
@@ -50,14 +50,14 @@
     <section id="introTab" class="tabcontent" tabindex="0" style="display: block;">
       <div class="intro-box">
         <p>
-          Loneliness affects over five million Australians, particularly older adults, causing significant health and economic challenges. This tool uses discrete choice experiment estimates to predict programme uptake probabilities, enabling personalised services based on the factors older adults value most.
+          Loneliness affects over five million Australians, particularly older adults, causing significant health and economic challenges. This tool uses discrete choice experiment estimates to predict programme uptake probabilities, enabling personalised services based on the attributes older adults value most.
         </p>
         <ul>
           <li><strong>Instructions</strong> – Step-by-step guidance.</li>
-          <li><strong>Attributes</strong> – Detailed explanation of programme features (hover over info icons for extra details, including the reference level).</li>
+          <li><strong>Attributes</strong> – Detailed explanation of programme features (hover over info icons for extra details, including reference levels except for cost).</li>
           <li><strong>Inputs</strong> – Configure your scenario parameters using visually appealing level cards.</li>
           <li><strong>WTP Results</strong> – View charts showing willingness-to-pay estimates.</li>
-          <li><strong>Predicted Programme Uptake</strong> – See the predicted uptake percentage and dynamic recommendations.</li>
+          <li><strong>Predicted Programme Uptake</strong> – See the predicted uptake percentage with dynamic, multi-feature recommendations.</li>
           <li><strong>Costs &amp; Benefits</strong> – Analyse cost components and QALY-based benefits with interactive sliders, pop-up info boxes, and educational summaries.</li>
           <li><strong>Scenarios</strong> – Save, compare, and export various configurations.</li>
         </ul>
@@ -69,11 +69,11 @@
       <div class="calculation-info">
         <h4>How to Use This Tool</h4>
         <ol>
-          <li style="margin-left: 20px;">Review the <strong>Attributes</strong> tab to understand each programme feature. Hover over the info icons to view extra details and the reference level.</li>
-          <li style="margin-left: 20px;">Configure your scenario in the <strong>Inputs</strong> tab using the level cards (hover over the info buttons for guidance). Note: For the “Method” feature, if you leave it unselected, it defaults to in-person.</li>
+          <li style="margin-left: 20px;">Review the <strong>Attributes</strong> tab to understand each programme feature. Hover over the info icons to see details and reference levels (except for cost per session).</li>
+          <li style="margin-left: 20px;">Configure your scenario in the <strong>Inputs</strong> tab using the level cards. All features (except method) are required; if no method is selected, in-person is assumed.</li>
           <li style="margin-left: 20px;">Click “Calculate &amp; View Results” to update charts and the cost-benefit analysis.</li>
           <li style="margin-left: 20px;">Examine the <strong>WTP Results</strong> tab to see the monetary value respondents assign to each attribute.</li>
-          <li style="margin-left: 20px;">Check the <strong>Predicted Programme Uptake</strong> tab to view the uptake percentage and dynamic recommendations that consider all features.</li>
+          <li style="margin-left: 20px;">Check the <strong>Predicted Programme Uptake</strong> tab to view the uptake percentage and dynamic recommendations based on all inputs.</li>
           <li style="margin-left: 20px;">Review the <strong>Costs &amp; Benefits</strong> tab for a detailed breakdown with educational summaries.</li>
           <li style="margin-left: 20px;">Save and compare different scenarios in the <strong>Scenarios</strong> tab or export the results to PDF.</li>
         </ol>
@@ -84,7 +84,7 @@
     <section id="attributesTab" class="tabcontent" tabindex="0">
       <h2>Key Attributes</h2>
       <div class="attributes-list">
-        <!-- Attribute Card 1: Cost per Session -->
+        <!-- Attribute Card 1: Cost per Session (no reference shown) -->
         <div class="attribute-card" tabindex="0">
           <div class="attribute-icon">
             <svg width="24" height="24" fill="#2980b9" xmlns="http://www.w3.org/2000/svg">
@@ -92,7 +92,6 @@
               <path d="M10 15l-3-3 1.4-1.4 1.6 1.6L15 7l1.4 1.4-6.4 6.4z" fill="#2980b9"/>
             </svg>
             <div class="tooltip" role="tooltip">
-              <strong>Reference: A$[Baseline]</strong><br/>
               The out-of-pocket fee (in AUD) participants must pay each time they attend.
             </div>
           </div>
@@ -226,7 +225,7 @@
                   <input type="radio" name="method" id="hybridCheck" value="hybrid" />
                   Hybrid (In-person &amp; Virtual)
                 </label>
-                <!-- If none selected, assume in-person -->
+                <!-- If none selected, default will be assumed as in-person -->
               </div>
             </div>
             <!-- Frequency Card -->
@@ -355,14 +354,14 @@
     <section id="probTab" class="tabcontent" tabindex="0">
       <div class="calculation-info">
         <h4>Predicted Programme Uptake</h4>
-        <p>Click “Show Probability Plot” to compute a new bar chart based on your Inputs. The chart displays the predicted programme uptake percentage.</p>
+        <p>Click “Show Probability Plot” to compute the predicted programme uptake percentage.</p>
         <div class="buttons-row">
           <button onclick="renderProbChart()">Show Probability Plot</button>
         </div>
         <div class="chart-grid">
-          <div class="chart-box">
+          <div class="chart-box" style="position: relative; height:300px;">
             <h3>Predicted Uptake</h3>
-            <canvas id="probChartMain"></canvas>
+            <canvas id="uptakeChart"></canvas>
           </div>
         </div>
       </div>
@@ -386,7 +385,7 @@
         <div class="modelling-assumptions">
           <h3><i class="fa-solid fa-lightbulb"></i> Modelling Assumptions</h3>
           <p>
-            Our analysis uses interactive cost sliders, pop-up info boxes and brief educational summaries to explain how costs and benefits are calculated.
+            Our analysis uses interactive cost sliders, pop-up info boxes and educational summaries to explain how costs and benefits are calculated.
             <br/><strong>Reference:</strong> Engel, L., Lee, Y. Y., Le, L. K. D., Lal, A., &amp; Mihalopoulos, C. (2021). Reducing loneliness to prevent depression in older adults in Australia: A modelled cost-effectiveness analysis. <em>Mental Health and Prevention, 24</em>. <a href="https://doi.org/10.1016/j.mhp.2021.200212" target="_blank">https://doi.org/10.1016/j.mhp.2021.200212</a>
           </p>
         </div>
@@ -395,6 +394,7 @@
           <button class="buttons-row" onclick="toggleBenefitsAnalysis()">Benefits Analysis</button>
         </div>
         <div id="detailedCostBreakdown" class="cost-cards" style="display:none;">
+          <!-- (Cost cards as defined previously) -->
           <div class="cost-card">
             <h4><i class="fa-solid fa-newspaper"></i> Advertisements in Local Press</h4>
             <p><strong>Value:</strong> A$2978.80</p>
